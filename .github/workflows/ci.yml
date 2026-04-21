@@ -1,0 +1,60 @@
+---
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        python-version: 
+          - "3.8"
+          - "3.9"
+          - "3.10"
+          - "3.11"
+          - "3.12"
+          - "3.13"
+          - "3.14"
+        os: [ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      # 1. Шаг: Получить код из репозитория
+      - uses: actions/checkout@v5
+
+      # 2. Шаг: Установить нужную версию Python из матрицы
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # 3. Шаг: Установить Poetry
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.8.3
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      # 4. Шаг: Установить зависимости проекта через Poetry
+      - name: Install dependencies
+        run: |
+          poetry install
+
+      # 5. Шаг: Проверка стиля кода (Линтинг) с использованием Ruff
+      - name: Lint with Ruff
+        run: |
+          poetry run ruff check .
+
+      # 6. Шаг: Запуск тестов с coverage
+      - name: Run tests with coverage
+        run: |
+          poetry run pytest \
+            --cov=tirajira \
+            --cov-report=xml \
+            --cov-report=term-missing

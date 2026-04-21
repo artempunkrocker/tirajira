@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues>
+  <issue>
+    <project>
+      <key>PROJ</key>
+    </project>
+    <summary>Настройка CI/CD для проекта Альфа</summary>
+    <description>Настроить непрерывную интеграцию и доставку для проекта Альфа</description>
+    <issuetype>
+      <name>Task</name>
+    </issuetype>
+    <assignee>
+      <emailAddress>developer@example.com</emailAddress>
+    </assignee>
+    <priority>
+      <name>High</name>
+    </priority>
+    <epic_key>PROJ-100</epic_key>
+    <customfield_10001>Бизнес-ценность: Высокая</customfield_10001>
+    <labels>
+      <item>urgent</item>
+      <item>devops</item>
+    </labels>
+  </issue>
+  <issue>
+    <project>
+      <key>PROJ</key>
+    </project>
+    <summary>Обновление документации API</summary>
+    <description>Обновить документацию REST API в соответствии с последними изменениями</description>
+    <issuetype>
+      <name>Task</name>
+    </issuetype>
+    <assignee>
+      <emailAddress>techwriter@example.com</emailAddress>
+    </assignee>
+    <priority>
+      <name>Medium</name>
+    </priority>
+    <epic_key>PROJ-101</epic_key>
+  </issue>
+  <issue>
+    <project>
+      <key>PROJ</key>
+    </project>
+    <summary>Исправление бага с авторизацией</summary>
+    <description>Исправить проблему с авторизацией пользователей в мобильном приложении</description>
+    <issuetype>
+      <name>Bug</name>
+    </issuetype>
+    <assignee>
+      <emailAddress>qa@example.com</emailAddress>
+    </assignee>
+    <priority>
+      <name>Critical</name>
+    </priority>
+    <epic_key>PROJ-102</epic_key>
+    <labels>
+      <item>bug</item>
+      <item>auth</item>
+      <item>mobile</item>
+    </labels>
+  </issue>
+</issues>
