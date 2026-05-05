@@ -1,5 +1,5 @@
 """
-Тесты для модуля логирования.
+Tests for the logging module.
 """
 
 import logging
@@ -9,143 +9,143 @@ from tirajira.logger import Logger, get_logger
 
 
 def test_logger_singleton():
-    """Тест: Logger реализует паттерн Singleton"""
+    """Test: Logger implements the Singleton pattern"""
     logger1 = Logger()
     logger2 = Logger()
     assert logger1 is logger2
 
 
 def test_get_logger_function():
-    """Тест: функция get_logger возвращает экземпляр Logger"""
+    """Test: get_logger function returns a Logger instance"""
     logger = get_logger()
     assert isinstance(logger, Logger)
 
 
 def test_logger_info_message():
-    """Тест: вывод информационного сообщения"""
-    # Создаем строковый буфер для захвата вывода
+    """Test: output of info message"""
+    # Create a string buffer to capture output
     output = StringIO()
 
-    # Создаем логгер с нашим буфером
+    # Create a logger with our buffer
     logger = Logger()
-    logger.logger.handlers.clear()  # Очищаем существующие обработчики
+    logger.logger.handlers.clear()  # Clear existing handlers
     handler = logging.StreamHandler(output)
     handler.setFormatter(logging.Formatter("%(message)s"))
     logger.logger.addHandler(handler)
 
-    # Выводим сообщение
-    logger.info("Тестовое сообщение")
+    # Output a message
+    logger.info("Test message")
 
-    # Проверяем результат
-    assert "Тестовое сообщение" in output.getvalue()
+    # Check the result
+    assert "Test message" in output.getvalue()
 
 
 def test_logger_error_message():
-    """Тест: вывод сообщения об ошибке"""
-    # Создаем строковый буфер для захвата вывода
+    """Test: output of error message"""
+    # Create a string buffer to capture output
     output = StringIO()
 
-    # Создаем логгер с нашим буфером
+    # Create a logger with our buffer
     logger = Logger()
-    logger.logger.handlers.clear()  # Очищаем существующие обработчики
+    logger.logger.handlers.clear()  # Clear existing handlers
     handler = logging.StreamHandler(output)
     handler.setFormatter(logging.Formatter("%(message)s"))
     logger.logger.addHandler(handler)
 
-    # Выводим сообщение об ошибке
-    logger.error("Тестовая ошибка")
+    # Output an error message
+    logger.error("Test error")
 
-    # Проверяем результат
-    assert "❌ Ошибка: Тестовая ошибка" in output.getvalue()
+    # Check the result
+    assert "❌ Error: Test error" in output.getvalue()
 
 
 def test_logger_success_message():
-    """Тест: вывод сообщения об успехе"""
-    # Создаем строковый буфер для захвата вывода
+    """Test: output of success message"""
+    # Create a string buffer to capture output
     output = StringIO()
 
-    # Создаем логгер с нашим буфером
+    # Create a logger with our buffer
     logger = Logger()
-    logger.logger.handlers.clear()  # Очищаем существующие обработчики
+    logger.logger.handlers.clear()  # Clear existing handlers
     handler = logging.StreamHandler(output)
     handler.setFormatter(logging.Formatter("%(message)s"))
     logger.logger.addHandler(handler)
 
-    # Выводим сообщение об успехе
-    logger.success("Тестовый успех")
+    # Output a success message
+    logger.success("Test success")
 
-    # Проверяем результат
-    assert "✅ Тестовый успех" in output.getvalue()
+    # Check the result
+    assert "✅ Test success" in output.getvalue()
 
 
 def test_logger_progress_message():
-    """Тест: вывод сообщения о прогрессе"""
-    # Создаем строковый буфер для захвата вывода
+    """Test: output of progress message"""
+    # Create a string buffer to capture output
     output = StringIO()
 
-    # Создаем логгер с нашим буфером
+    # Create a logger with our buffer
     logger = Logger()
-    logger.logger.handlers.clear()  # Очищаем существующие обработчики
+    logger.logger.handlers.clear()  # Clear existing handlers
     handler = logging.StreamHandler(output)
     handler.setFormatter(logging.Formatter("%(message)s"))
     logger.logger.addHandler(handler)
 
-    # Выводим сообщение о прогрессе
-    logger.progress("Тестовый прогресс")
+    # Output a progress message
+    logger.progress("Test progress")
 
-    # Проверяем результат
-    assert "⏳ Тестовый прогресс" in output.getvalue()
+    # Check the result
+    assert "⏳ Test progress" in output.getvalue()
 
 
 def test_logger_debug_message_verbose():
-    """Тест: вывод отладочного сообщения в verbose режиме"""
-    # Создаем строковый буфер для захвата вывода
+    """Test: output of debug message in verbose mode"""
+    # Create a string buffer to capture output
     output = StringIO()
 
-    # Создаем логгер с нашим буфером
+    # Create a logger with our buffer
     logger = Logger()
-    logger.logger.handlers.clear()  # Очищаем существующие обработчики
+    logger.logger.handlers.clear()  # Clear existing handlers
     handler = logging.StreamHandler(output)
     handler.setFormatter(logging.Formatter("%(message)s"))
     logger.logger.addHandler(handler)
 
-    # Устанавливаем verbose режим и выводим отладочное сообщение
+    # Set verbose mode and output a debug message
     logger.set_verbose(True)
-    logger.debug("Тестовое отладочное сообщение")
+    logger.debug("Test debug message")
 
-    # Проверяем результат
-    assert "🔍 Debug: Тестовое отладочное сообщение" in output.getvalue()
+    # Check the result
+    assert "🔍 Debug: Test debug message" in output.getvalue()
 
 
 def test_logger_debug_message_non_verbose():
-    """Тест: отладочное сообщение не выводится без verbose режима"""
-    # Создаем строковый буфер для захвата вывода
+    """Test: debug message is not output without verbose mode"""
+    # Create a string buffer to capture output
     output = StringIO()
 
-    # Создаем логгер с нашим буфером
+    # Create a logger with our buffer
     logger = Logger()
-    logger.logger.handlers.clear()  # Очищаем существующие обработчики
+    logger.logger.handlers.clear()  # Clear existing handlers
     handler = logging.StreamHandler(output)
     handler.setFormatter(logging.Formatter("%(message)s"))
     logger.logger.addHandler(handler)
 
-    # Не устанавливаем verbose режим и выводим отладочное сообщение
+    # Don't set verbose mode and output a debug message
     logger.set_verbose(False)
-    logger.debug("Тестовое отладочное сообщение")
+    logger.debug("Test debug message")
 
-    # Проверяем, что сообщение не выведено
-    assert "🔍 Debug: Тестовое отладочное сообщение" not in output.getvalue()
+    # Check that the message is not output
+    assert "🔍 Debug: Test debug message" not in output.getvalue()
 
 
 def test_logger_set_verbose_true():
-    """Тест: установка verbose режима в True"""
+    """Test: setting verbose mode to True"""
     logger = Logger()
     logger.set_verbose(True)
     assert logger.verbose_mode is True
 
 
 def test_logger_set_verbose_false():
-    """Тест: установка verbose режима в False"""
+    """Test: setting verbose mode to False"""
     logger = Logger()
     logger.set_verbose(False)
     assert logger.verbose_mode is False

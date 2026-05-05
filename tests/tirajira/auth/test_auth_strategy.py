@@ -4,18 +4,18 @@ from tirajira.auth.auth_strategy import BasicAuthStrategy, PatAuthStrategy
 
 
 def test_basic_auth_strategy():
-    """Тест: стратегия базовой аутентификации"""
+    """Test: basic authentication strategy"""
     strategy = BasicAuthStrategy(
         "https://test.atlassian.net", "test@example.com", "token123"
     )
 
-    # Проверяем параметры аутентификации
+    # Check authentication parameters
     auth_params = strategy.get_auth_params()
     assert auth_params["server"] == "https://test.atlassian.net"
     assert auth_params["email"] == "test@example.com"
     assert auth_params["auth_type"] == "basic_auth"
 
-    # Проверяем создание клиента JIRA (мокаем JIRA)
+    # Check JIRA client creation (mocking JIRA)
     with patch("tirajira.auth.auth_strategy.JIRA") as mock_jira_class:
         mock_jira_instance = Mock()
         mock_jira_class.return_value = mock_jira_instance
@@ -29,15 +29,15 @@ def test_basic_auth_strategy():
 
 
 def test_pat_auth_strategy():
-    """Тест: стратегия PAT аутентификации"""
+    """Test: PAT authentication strategy"""
     strategy = PatAuthStrategy("https://test.atlassian.net", "pat_token_123")
 
-    # Проверяем параметры аутентификации
+    # Check authentication parameters
     auth_params = strategy.get_auth_params()
     assert auth_params["server"] == "https://test.atlassian.net"
     assert auth_params["auth_type"] == "pat_auth"
 
-    # Проверяем создание клиента JIRA (мокаем JIRA)
+    # Check JIRA client creation (mocking JIRA)
     with patch("tirajira.auth.auth_strategy.JIRA") as mock_jira_class:
         mock_jira_instance = Mock()
         mock_jira_class.return_value = mock_jira_instance

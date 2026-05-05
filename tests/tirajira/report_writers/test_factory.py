@@ -1,5 +1,5 @@
 """
-Тесты для фабрики писателей отчетов.
+Tests for the report writers factory.
 """
 
 import pytest
@@ -13,88 +13,88 @@ from tirajira.report_writers.yaml_writer import YamlReportWriter
 
 
 def test_create_report_writer_json():
-    """Тест: создание писателя отчетов для формата JSON"""
-    # Создаем писатель отчетов
+    """Test: creating a report writer for JSON format"""
+    # Create a report writer
     writer = create_report_writer("json")
 
-    # Проверяем, что создан правильный тип писателя
+    # Check that the correct type of writer was created
     assert isinstance(writer, JsonReportWriter)
 
 
 def test_create_report_writer_yaml():
-    """Тест: создание писателя отчетов для формата YAML"""
-    # Создаем писатель отчетов
+    """Test: creating a report writer for YAML format"""
+    # Create a report writer
     writer = create_report_writer("yaml")
 
-    # Проверяем, что создан правильный тип писателя
+    # Check that the correct type of writer was created
     assert isinstance(writer, YamlReportWriter)
 
 
 def test_create_report_writer_yml():
-    """Тест: создание писателя отчетов для формата YML"""
-    # Создаем писатель отчетов
+    """Test: creating a report writer for YML format"""
+    # Create a report writer
     writer = create_report_writer("yml")
 
-    # Проверяем, что создан правильный тип писателя
+    # Check that the correct type of writer was created
     assert isinstance(writer, YamlReportWriter)
 
 
 def test_create_report_writer_csv():
-    """Тест: создание писателя отчетов для формата CSV"""
-    # Создаем писатель отчетов
+    """Test: creating a report writer for CSV format"""
+    # Create a report writer
     writer = create_report_writer("csv")
 
-    # Проверяем, что создан правильный тип писателя
+    # Check that the correct type of writer was created
     assert isinstance(writer, CsvReportWriter)
 
 
 def test_create_report_writer_excel():
-    """Тест: создание писателя отчетов для формата Excel"""
-    # Создаем писатель отчетов
+    """Test: creating a report writer for Excel format"""
+    # Create a report writer
     writer = create_report_writer("excel")
 
-    # Проверяем, что создан правильный тип писателя
+    # Check that the correct type of writer was created
     assert isinstance(writer, ExcelReportWriter)
 
 
 def test_create_report_writer_xlsx():
-    """Тест: создание писателя отчетов для формата XLSX"""
-    # Создаем писатель отчетов
+    """Test: creating a report writer for XLSX format"""
+    # Create a report writer
     writer = create_report_writer("xlsx")
 
-    # Проверяем, что создан правильный тип писателя
+    # Check that the correct type of writer was created
     assert isinstance(writer, ExcelReportWriter)
 
 
 def test_create_report_writer_xml():
-    """Тест: создание писателя отчетов для формата XML"""
-    # Создаем писатель отчетов
+    """Test: creating a report writer for XML format"""
+    # Create a report writer
     writer = create_report_writer("xml")
 
-    # Проверяем, что создан правильный тип писателя
+    # Check that the correct type of writer was created
     assert isinstance(writer, XmlReportWriter)
 
 
 def test_create_report_writer_invalid_format():
-    """Тест: создание писателя отчетов для неподдерживаемого формата"""
-    # Проверяем, что выбрасывается исключение для неподдерживаемого формата
-    with pytest.raises(ValueError, match="Не поддерживаемый формат отчета: txt"):
+    """Test: creating a report writer for unsupported format"""
+    # Check that an exception is thrown for unsupported format
+    with pytest.raises(ValueError, match="Unsupported report format: txt"):
         create_report_writer("txt")
 
 
 def test_create_report_writer_default():
-    """Тест: создание писателя отчетов по умолчанию"""
-    # Создаем писатель отчетов без указания формата
+    """Test: creating a default report writer"""
+    # Create a report writer without specifying a format
     writer = create_report_writer()
 
-    # Проверяем, что создан писатель по умолчанию (JSON)
+    # Check that the default writer (JSON) was created
     assert isinstance(writer, JsonReportWriter)
 
 
 def test_create_report_writer_case_insensitive():
-    """Тест: создание писателя отчетов регистронезависимо"""
-    # Создаем писатель отчетов в верхнем регистре
+    """Test: creating a report writer case-insensitively"""
+    # Create a report writer in uppercase
     writer = create_report_writer("JSON")
 
-    # Проверяем, что создан правильный тип писателя
+    # Check that the correct type of writer was created
     assert isinstance(writer, JsonReportWriter)

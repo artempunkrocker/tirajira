@@ -1,5 +1,5 @@
 """
-Фабрика для создания писателей отчетов.
+Factory for creating report writers.
 """
 
 from typing import Dict, Type
@@ -14,16 +14,16 @@ from .yaml_writer import YamlReportWriter
 
 def create_report_writer(format: str = "json") -> ReportWriter:
     """
-    Создает писатель отчетов в зависимости от формата.
+    Creates a report writer depending on the format.
 
     Args:
-        format: Формат отчета (по умолчанию "json")
+        format: Report format (default "json")
 
     Returns:
-        ReportWriter: Писатель отчетов
+        ReportWriter: Report writer
 
     Raises:
-        ValueError: Если формат не поддерживается
+        ValueError: If format is not supported
     """
     writers: Dict[str, Type[ReportWriter]] = {
         "json": JsonReportWriter,
@@ -37,6 +37,6 @@ def create_report_writer(format: str = "json") -> ReportWriter:
 
     writer_class = writers.get(format.lower())
     if writer_class is None:
-        raise ValueError(f"Не поддерживаемый формат отчета: {format}")
+        raise ValueError(f"Unsupported report format: {format}")
 
     return writer_class()

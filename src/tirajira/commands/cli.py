@@ -1,128 +1,137 @@
 """
-CLI интерфейс для TiraJira.
+CLI interface for TiraJira.
 """
 
 import argparse
 import sys
 
+from .. import __version__
 from .extract_failed import ExtractFailedCommand
 from .import_cmd import ImportCommand
 from .resume import ResumeCommand
 
 
 def create_argument_parser():
-    """Создает парсер аргументов командной строки."""
+    """Creates a command line argument parser."""
     parser = argparse.ArgumentParser(
         prog="tirajira",
-        description="Инструмент для автоматизации массового создания задач в Jira",
+        description="Tool for automating mass task creation in Jira",
     )
 
-    # Добавляем общие аргументы
-    parser.add_argument("--version", action="version", version="%(prog)s 1.0.0")
+    # Add common arguments
+    parser.add_argument(
+        "--version", action="version", version=f"%(prog)s {__version__}"
+    )
 
-    # Создаем подпарсеры для команд
-    subparsers = parser.add_subparsers(dest="command", help="Доступные команды")
+    # Create subparsers for commands
+    subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
-    # Подпарсер для команды import
+    # Subparser for import command
     import_parser = subparsers.add_parser(
-        "import", help="Импорт и создание задач из файла"
+        "import", help="Import and create tasks from file"
     )
-    import_parser.add_argument("file", help="Путь к файлу с задачами")
+    import_parser.add_argument("file", help="Path to the task file")
     import_parser.add_argument(
-        "--batch-size",
-        "-b",
+        "--max-concurrent-requests",
+        "-mcr",
         type=int,
         default=10,
-        help="Размер пакета для обработки задач (по умолчанию: 10)",
+        help="Maximum number of concurrent requests (default: 10)",
     )
     import_parser.add_argument(
-        "--delay",
-        "-d",
+        "--min-request-interval",
+        "-mri",
         type=float,
         default=1.0,
-        help="Задержка между пакетами в секундах (по умолчанию: 1.0)",
+        help="Minimum interval between requests in seconds (default: 1.0)",
     )
     import_parser.add_argument(
         "--stop-on-error",
         action="store_true",
-        help="Прекратить обработку при возникновении ошибки",
+        help="Stop processing on error",
     )
     import_parser.add_argument(
         "--verbose",
         "-v",
         action="store_true",
-        help="Включить подробный режим логирования",
+        help="Enable verbose logging mode",
     )
     import_parser.add_argument(
         "--report",
         nargs="?",
         const=True,
-        help="Сохранить машинночитаемый отчет о выполнении в формате JSON, "
-        "CSV, Excel или YAML",
+        help="Save machine-readable execution report in JSON, "
+        "CSV, Excel, or YAML format",
     )
 
-    # Подпарсер для команды extract-failed
+    # Subparser for extract-failed command
     extract_failed_parser = subparsers.add_parser(
-        "extract-failed", help="Извлечение неудачных задач из отчета"
+        "extract-failed", help="Extract failed tasks from report"
     )
-    extract_failed_parser.add_argument("report_file", help="Путь к файлу отчета")
-    extract_failed_parser.add_argument("output_file", help="Путь к выходному файлу")
+    extract_failed_parser.add_argument("report_file", help="Path to the report file")
+    extract_failed_parser.add_argument("output_file", help="Path to the output file")
 
-    # Подпарсер для команды resume
+    # Subparser for resume command
     resume_parser = subparsers.add_parser(
-        "resume", help="Продолжение выполнения из отчета"
+        "resume", help="Continue execution from report"
     )
-    resume_parser.add_argument("report_file", help="Путь к файлу отчета")
+    resume_parser.add_argument("report_file", help="Path to the report file")
     resume_parser.add_argument(
-        "--batch-size",
-        "-b",
+        "--max-concurrent-requests",
+        "-mcr",
         type=int,
         default=10,
-        help="Размер пакета для обработки задач (по умолчанию: 10)",
+        help="Maximum number of concurrent requests (default: 10)",
     )
     resume_parser.add_argument(
-        "--delay",
-        "-d",
+        "--min-request-interval",
+        "-mri",
         type=float,
         default=1.0,
-        help="Задержка между пакетами в секундах (по умолчанию: 1.0)",
+        help="Minimum interval between requests in seconds (default: 1.0)",
     )
     resume_parser.add_argument(
         "--stop-on-error",
         action="store_true",
-        help="Прекратить обработку при возникновении ошибки",
+        help="Stop processing on error",
     )
     resume_parser.add_argument(
         "--verbose",
         "-v",
         action="store_true",
-        help="Включить подробный режим логирования",
+        help="Enable verbose logging mode",
     )
     resume_parser.add_argument(
         "--report",
         nargs="?",
         const=True,
-        help="Сохранить машинночитаемый отчет о выполнении в формате JSON, "
-        "CSV, Excel или YAML",
+        help="Save machine-readable execution report in JSON, "
+        "CSV, Excel, or YAML format",
     )
 
     return parser
 
 
 def main():
-    """Главная точка входа CLI."""
+    """Main CLI entry point."""
     parser = create_argument_parser()
     args = parser.parse_args()
 
     if args.command == "import":
         command = ImportCommand(args)
-        command.execute()
+        result = command.run()
+        if result == 1:
+            sys.exit(1)
     elif args.command == "extract-failed":
         command = ExtractFailedCommand(args)
-        command.execute()
+        result = command.run()
+        if result == 1:
+            sys.exit(1)
     elif args.command == "resume":
         command = ResumeCommand(args)
-        command.execute()
+        result = command.run()
+        if result == 1:
+            sys.exit(1)
     else:
         parser.print_help()
         sys.exit(1)

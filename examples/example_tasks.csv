@@ -1,4 +1,4 @@
 project.key,summary,description,issuetype.name,assignee.name,priority.name,epic_key
-PROJ,"Настройка CI/CD для проекта Альфа","Настроить непрерывную интеграцию и доставку для проекта Альфа",Task,developer,High,PROJ-100
-PROJ,"Обновление документации API","Обновить документацию REST API в соответствии с последними изменениями",Task,techwriter,Medium,PROJ-101
-PROJ,"Исправление бага с авторизацией","Исправить проблему с авторизацией пользователей в мобильном приложении",Bug,qa,Critical,PROJ-102
+PROJ,"Setting up CI/CD for Project Alpha","Set up continuous integration and delivery for Project Alpha",Task,developer,High,PROJ-100
+PROJ,"API Documentation Update","Update REST API documentation according to recent changes",Task,techwriter,Medium,PROJ-101
+PROJ,"Authorization Bug Fix","Fix user authorization issue in mobile application",Bug,qa,Critical,PROJ-102

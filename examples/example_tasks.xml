@@ -4,8 +4,8 @@
     <project>
       <key>PROJ</key>
     </project>
-    <summary>Настройка CI/CD для проекта Альфа</summary>
-    <description>Настроить непрерывную интеграцию и доставку для проекта Альфа</description>
+<summary>Setting up CI/CD for Project Alpha</summary>
+<description>Set up continuous integration and delivery for Project Alpha</description>
     <issuetype>
       <name>Task</name>
     </issuetype>
@@ -16,7 +16,7 @@
       <name>High</name>
     </priority>
     <epic_key>PROJ-100</epic_key>
-    <customfield_10001>Бизнес-ценность: Высокая</customfield_10001>
+    <customfield_10001>Business Value: High</customfield_10001>
     <labels>
       <item>urgent</item>
       <item>devops</item>
@@ -26,8 +26,8 @@
     <project>
       <key>PROJ</key>
     </project>
-    <summary>Обновление документации API</summary>
-    <description>Обновить документацию REST API в соответствии с последними изменениями</description>
+<summary>API Documentation Update</summary>
+<description>Update REST API documentation according to recent changes</description>
     <issuetype>
       <name>Task</name>
     </issuetype>
@@ -43,8 +43,8 @@
     <project>
       <key>PROJ</key>
     </project>
-    <summary>Исправление бага с авторизацией</summary>
-    <description>Исправить проблему с авторизацией пользователей в мобильном приложении</description>
+<summary>Authorization Bug Fix</summary>
+<description>Fix user authorization issue in mobile application</description>
     <issuetype>
       <name>Bug</name>
     </issuetype>

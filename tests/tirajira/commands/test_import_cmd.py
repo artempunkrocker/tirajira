@@ -1,5 +1,5 @@
 """
-Тесты для команды импорта TiraJira.
+Tests for TiraJira import command.
 """
 
 from unittest.mock import Mock, patch
@@ -7,168 +7,163 @@ from unittest.mock import Mock, patch
 from tirajira.commands.import_cmd import ImportCommand
 
 
-@patch("tirajira.commands.import_cmd.JiraClient")
-@patch("tirajira.commands.import_cmd.BatchProcessor")
-@patch("tirajira.commands.import_cmd.TaskCreator")
+@patch("tirajira.commands.base.JiraClient")
+@patch("tirajira.commands.base.RateLimiter")
+@patch("tirajira.commands.base.TaskCreator")
 def test_import_command_execute_success(
-    mock_task_creator, mock_batch_processor, mock_jira_client
+    mock_task_creator, mock_rate_limiter, mock_jira_client
 ):
-    """Тест: успешное выполнение команды импорта"""
-    # Настраиваем mock аргументы
+    """Test: successful execution of import command"""
+    # Setup mock arguments
     args = Mock()
     args.file = "test.json"
-    args.batch_size = 10
-    args.delay = 1.0
+    args.max_concurrent_requests = 10
+    args.min_request_interval = 1.0
     args.stop_on_error = False
     args.verbose = False
     args.report = None
 
-    # Настраиваем mock объекты
+    # Setup mock objects
     mock_jira_client_instance = Mock()
     mock_jira_client.return_value = mock_jira_client_instance
 
-    mock_batch_processor_instance = Mock()
-    mock_batch_processor.return_value = mock_batch_processor_instance
+    mock_rate_limiter_instance = Mock()
+    mock_rate_limiter.return_value = mock_rate_limiter_instance
 
     mock_task_creator_instance = Mock()
     mock_task_creator.return_value = mock_task_creator_instance
 
-    # Создаем команду и выполняем её
+    # Create command and execute it
     command = ImportCommand(args)
-    command.execute()
+    command.run()
 
-    # Проверяем, что все компоненты были созданы правильно
+    # Check that all components were created correctly
     mock_jira_client.assert_called_once_with(verbose=False)
-    mock_batch_processor.assert_called_once_with(
+    mock_rate_limiter.assert_called_once_with(
         mock_jira_client_instance,
-        batch_size=10,
-        delay=1.0,
+        max_concurrent_requests=10,
+        min_request_interval=1.0,
         stop_on_error=False,
         verbose=False,
     )
     mock_task_creator.assert_called_once_with(
         jira_client=mock_jira_client_instance,
-        batch_processor=mock_batch_processor_instance,
+        rate_limiter=mock_rate_limiter_instance,
         verbose=False,
     )
 
-    # Проверяем, что метод create_from_file был вызван с правильными аргументами
+    # Check that create_from_file method was called with correct arguments
     mock_task_creator_instance.create_from_file.assert_called_once_with(
         file_path="test.json",
-        batch_size=10,
-        delay=1.0,
+        max_concurrent_requests=10,
+        min_request_interval=1.0,
         stop_on_error=False,
         verbose=False,
         report_file=None,
     )
 
 
-@patch("tirajira.commands.import_cmd.JiraClient")
-@patch("tirajira.commands.import_cmd.BatchProcessor")
-@patch("tirajira.commands.import_cmd.TaskCreator")
-@patch("tirajira.commands.import_cmd.get_logger")
+@patch("tirajira.commands.base.JiraClient")
+@patch("tirajira.commands.base.RateLimiter")
+@patch("tirajira.commands.base.TaskCreator")
+@patch("tirajira.commands.base.get_logger")
 def test_import_command_execute_with_options(
-    mock_get_logger, mock_task_creator, mock_batch_processor, mock_jira_client
+    mock_get_logger, mock_task_creator, mock_rate_limiter, mock_jira_client
 ):
-    """Тест: выполнение команды импорта с опциями"""
-    # Настраиваем mock аргументы
+    """Test: executing import command with options"""
+    # Setup mock arguments
     args = Mock()
     args.file = "test.csv"
-    args.batch_size = 5
-    args.delay = 2.5
+    args.max_concurrent_requests = 5
+    args.min_request_interval = 2.5
     args.stop_on_error = True
     args.verbose = True
     args.report = "report.json"
 
-    # Настраиваем mock объекты
+    # Setup mock objects
     mock_logger = Mock()
     mock_get_logger.return_value = mock_logger
 
     mock_jira_client_instance = Mock()
     mock_jira_client.return_value = mock_jira_client_instance
 
-    mock_batch_processor_instance = Mock()
-    mock_batch_processor.return_value = mock_batch_processor_instance
+    mock_rate_limiter_instance = Mock()
+    mock_rate_limiter.return_value = mock_rate_limiter_instance
 
     mock_task_creator_instance = Mock()
     mock_task_creator.return_value = mock_task_creator_instance
 
-    # Создаем команду и выполняем её
+    # Create command and execute it
     command = ImportCommand(args)
-    command.execute()
+    command.run()
 
-    # Проверяем, что логгер был вызван правильно
+    # Check that logger was called correctly
     mock_get_logger.assert_called_once()
     mock_logger.set_verbose.assert_called_once_with(True)
 
-    # Проверяем, что все компоненты были созданы правильно
+    # Check that all components were created correctly
     mock_jira_client.assert_called_once_with(verbose=True)
-    mock_batch_processor.assert_called_once_with(
+    mock_rate_limiter.assert_called_once_with(
         mock_jira_client_instance,
-        batch_size=5,
-        delay=2.5,
+        max_concurrent_requests=5,
+        min_request_interval=2.5,
         stop_on_error=True,
         verbose=True,
     )
     mock_task_creator.assert_called_once_with(
         jira_client=mock_jira_client_instance,
-        batch_processor=mock_batch_processor_instance,
+        rate_limiter=mock_rate_limiter_instance,
         verbose=True,
     )
 
-    # Проверяем, что метод create_from_file был вызван с правильными аргументами
+    # Check that create_from_file method was called with correct arguments
     mock_task_creator_instance.create_from_file.assert_called_once_with(
         file_path="test.csv",
-        batch_size=5,
-        delay=2.5,
+        max_concurrent_requests=5,
+        min_request_interval=2.5,
         stop_on_error=True,
         verbose=True,
         report_file="report.json",
     )
 
 
-@patch("tirajira.commands.import_cmd.JiraClient")
-@patch("tirajira.commands.import_cmd.BatchProcessor")
-@patch("tirajira.commands.import_cmd.TaskCreator")
-@patch("tirajira.commands.import_cmd.get_logger")
-@patch("tirajira.commands.import_cmd.sys.exit")
+@patch("tirajira.commands.base.JiraClient")
+@patch("tirajira.commands.base.RateLimiter")
+@patch("tirajira.commands.base.TaskCreator")
+@patch("tirajira.commands.exception_handler.get_logger")
 def test_import_command_execute_exception_handling(
-    mock_sys_exit,
     mock_get_logger,
     mock_task_creator,
-    mock_batch_processor,
+    mock_rate_limiter,
     mock_jira_client,
 ):
-    """Тест: обработка исключений в команде импорта"""
-    # Настраиваем mock аргументы
+    """Test: exception handling in import command"""
+    # Setup mock arguments
     args = Mock()
     args.file = "nonexistent.json"
-    args.batch_size = 10
-    args.delay = 1.0
+    args.max_concurrent_requests = 10
+    args.min_request_interval = 1.0
     args.stop_on_error = False
     args.verbose = False
     args.report = None
 
-    # Настраиваем mock объекты
+    # Setup mock objects
     mock_logger = Mock()
     mock_get_logger.return_value = mock_logger
 
-    # Настраиваем mock, чтобы он выбрасывал исключение
+    # Setup mock to throw an exception
     mock_task_creator_instance = Mock()
     mock_task_creator_instance.create_from_file.side_effect = Exception(
         "File not found"
     )
     mock_task_creator.return_value = mock_task_creator_instance
 
-    # Создаем команду и выполняем её
+    # Create command and execute it
     command = ImportCommand(args)
-    command.execute()
+    result = command.run()
 
-    # Проверяем, что логгер записал ошибку
+    # Check that logger recorded error (now through decorator)
     mock_get_logger.assert_called_once()
-    mock_logger.error.assert_called_once_with(
-        "Ошибка при импорте задач: File not found"
-    )
+    mock_logger.error.assert_called_once_with("Error executing command: File not found")
 
-    # Проверяем, что sys.exit был вызван с кодом 1
-    mock_sys_exit.assert_called_once_with(1)
+    assert result == 1

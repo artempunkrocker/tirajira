@@ -1,45 +1,41 @@
 """
-Тесты для менеджера помощи TiraJira.
+Tests for TiraJira help manager.
 """
 
 import io
 from unittest.mock import patch
 
+from tirajira import __version__
 from tirajira.commands.help_manager import display_help
 
 
 @patch("sys.stdout", new_callable=io.StringIO)
 def test_display_help(mock_stdout):
-    """Тест: отображение справочной информации"""
+    """Test: displaying help information"""
     display_help()
 
     output = mock_stdout.getvalue()
 
-    # Проверяем, что вывод содержит ключевые элементы справки
-    assert "TiraJira (тиражира)" in output
-    assert "инструмент для автоматизации массового создания задач в Jira" in output
-    assert "Форматы поддерживаемых файлов:" in output
+    # Check that output contains key help elements
+    assert "TiraJira - tool for automating mass task creation in Jira" in output
+    assert "Supported file formats:" in output
     assert "JSON (.json)" in output
     assert "YAML (.yaml, .yml)" in output
     assert "CSV (.csv)" in output
     assert "Excel (.xlsx)" in output
-    assert "Использование:" in output
-    assert "python3 main.py <путь_к_файлу>" in output
-    assert "Примеры:" in output
-    assert "Дополнительная информация:" in output
-    assert (
-        "Перед использованием необходимо настроить параметры подключения к Jira"
-        in output
-    )
+    assert "Usage:" in output
+    assert "python3 main.py <path_to_file>" in output
+    assert "Examples:" in output
+    assert "Additional information:" in output
+    assert "Before using, you need to configure Jira connection parameters" in output
 
 
 @patch("sys.stdout", new_callable=io.StringIO)
-@patch("tirajira.__version__", "1.0.0")
 def test_display_help_version(mock_stdout):
-    """Тест: отображение версии в справке"""
+    """Test: displaying version in help"""
     display_help()
 
     output = mock_stdout.getvalue()
 
-    # Проверяем, что вывод содержит версию
-    assert "Версия: 1.0.0" in output
+    # Check that output contains version
+    assert f"Version: {__version__}" in output

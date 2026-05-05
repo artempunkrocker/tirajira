@@ -1,5 +1,5 @@
 """
-Базовый класс для писателей отчетов.
+Base class for report writers.
 """
 
 from abc import ABC, abstractmethod
@@ -7,15 +7,15 @@ from typing import Any, Dict
 
 
 class ReportWriter(ABC):
-    """Абстрактный класс для записи отчетов."""
+    """Abstract class for writing reports."""
 
     @abstractmethod
     def write_report(self, report_data: Dict[str, Any], file_path: str) -> None:
         """
-        Записывает отчет в файл.
+        Writes a report to a file.
 
         Args:
-            report_data: Данные отчета для записи
-            file_path: Путь к файлу отчета
+            report_data: Report data to write
+            file_path: Path to the report file
         """
         pass

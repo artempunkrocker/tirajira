@@ -7,28 +7,28 @@ from tirajira.main import create_tasks_from_file, main
 
 
 @patch("tirajira.main.TaskCreator")
-@patch("tirajira.main.BatchProcessor")
+@patch("tirajira.main.RateLimiter")
 @patch("tirajira.main.JiraClient")
 def test_create_tasks_from_file_success(
-    mock_jira_client, mock_batch_processor, mock_task_creator
+    mock_jira_client, mock_rate_limiter, mock_task_creator
 ):
-    """Тест: успешное создание задач из файла"""
-    # Подготавливаем mock объекты
+    """Test: successful creation of tasks from file"""
+    # Prepare mock objects
     mock_task_creator_instance = Mock()
     mock_task_creator_instance.create_from_file.return_value = 1
     mock_task_creator.return_value = mock_task_creator_instance
 
-    # Вызываем тестируемую функцию
+    # Call the function under test
     create_tasks_from_file("test.json")
 
-    # Проверяем, что методы были вызваны правильно
+    # Check that methods were called correctly
     mock_jira_client.assert_called_once()
-    mock_batch_processor.assert_called_once()
+    mock_rate_limiter.assert_called_once()
     mock_task_creator.assert_called_once()
     mock_task_creator_instance.create_from_file.assert_called_once_with(
         file_path="test.json",
-        batch_size=10,
-        delay=1.0,
+        max_concurrent_requests=10,
+        min_request_interval=1.0,
         stop_on_error=False,
         verbose=False,
         report_file=None,
@@ -36,61 +36,64 @@ def test_create_tasks_from_file_success(
 
 
 @patch("tirajira.main.TaskCreator")
-@patch("tirajira.main.BatchProcessor")
+@patch("tirajira.main.RateLimiter")
 @patch("tirajira.main.JiraClient")
 def test_create_tasks_from_file_not_found(
-    mock_jira_client, mock_batch_processor, mock_task_creator
+    mock_jira_client, mock_rate_limiter, mock_task_creator
 ):
-    """Тест: обработка ошибки файла не найден"""
-    # Настраиваем mock чтобы выбрасывал исключение
+    """Test: handling file not found error"""
+    # Configure mock to throw an exception
     mock_task_creator_instance = Mock()
     mock_task_creator_instance.create_from_file.side_effect = FileNotFoundError(
-        "Файл test.json не найден."
+        "File test.json not found."
     )
     mock_task_creator.return_value = mock_task_creator_instance
 
-    # Проверяем, что функция завершается с кодом 1
+    # Check that the function exits with code 1
     with pytest.raises(SystemExit) as excinfo:
         create_tasks_from_file("test.json")
     assert excinfo.value.code == 1
 
 
 def test_main_no_args(capsys):
-    """Тест: вызов без аргументов выводит справку"""
+    """Test: calling without arguments displays help"""
     with patch("sys.argv", ["main.py"]):
         with pytest.raises(SystemExit) as exc_info:
             main()
-        # Проверяем, что код выхода равен 1
+        # Check that the exit code is 1
         assert exc_info.value.code == 1
 
     captured = capsys.readouterr()
-    # Проверяем наличие ключевых элементов справки
+    # Check for key help elements
     assert "usage: tirajira" in captured.out
     assert "import" in captured.out
     assert "extract-failed" in captured.out
     assert "resume" in captured.out
 
 
-def test_main_with_file_arg():
-    """Тест: вызов с аргументом файла через команду import"""
-    # Проверяем, что программа запускается без ошибок с правильными аргументами
+def test_main_with_file_arg(capsys):
+    """Test: calling with file argument through import command"""
+    # Check that the program runs without errors with correct arguments
     with patch("sys.argv", ["main.py", "import", "--help"]):
         with pytest.raises(SystemExit) as exc_info:
             main()
-        # Проверяем, что код выхода равен 0 (успешное завершение для --help)
+        # Check that the exit code is 0 (successful completion for --help)
         assert exc_info.value.code == 0
+
+    # Capture output so it doesn't display in the console
+    _ = capsys.readouterr()
 
 
 def test_main_with_help_arg(capsys):
-    """Тест: вызов с аргументом --help выводит справку"""
+    """Test: calling with --help argument displays help"""
     with patch("sys.argv", ["main.py", "--help"]):
         with pytest.raises(SystemExit) as exc_info:
             main()
-        # Проверяем, что код выхода равен 0 (успешное завершение для --help)
+        # Check that the exit code is 0 (successful completion for --help)
         assert exc_info.value.code == 0
 
     captured = capsys.readouterr()
-    # Проверяем наличие ключевых элементов справки
+    # Check for key help elements
     assert "usage: tirajira" in captured.out
     assert "import" in captured.out
     assert "extract-failed" in captured.out
@@ -98,11 +101,11 @@ def test_main_with_help_arg(capsys):
 
 
 def test_main_with_version_arg(capsys):
-    """Тест: вызов с аргументом --version выводит версию"""
+    """Test: calling with --version argument displays version"""
     with patch("sys.argv", ["main.py", "--version"]):
         with pytest.raises(SystemExit) as exc_info:
             main()
-        # Проверяем, что код выхода равен 0 (успешное завершение для --version)
+        # Check that the exit code is 0 (successful completion for --version)
         assert exc_info.value.code == 0
 
     captured = capsys.readouterr()
@@ -110,11 +113,11 @@ def test_main_with_version_arg(capsys):
 
 
 def test_main_with_short_version_arg(capsys):
-    """Тест: вызов с аргументом --version выводит версию"""
+    """Test: calling with --version argument displays version"""
     with patch("sys.argv", ["main.py", "--version"]):
         with pytest.raises(SystemExit) as exc_info:
             main()
-        # Проверяем, что код выхода равен 0 (успешное завершение для --version)
+        # Check that the exit code is 0 (successful completion for --version)
         assert exc_info.value.code == 0
 
     captured = capsys.readouterr()
@@ -122,23 +125,23 @@ def test_main_with_short_version_arg(capsys):
 
 
 def test_main_module_execution():
-    """Тест: выполнение модуля как скрипт"""
-    # Проверяем, что модуль может быть импортирован без ошибок
+    """Test: executing module as script"""
+    # Check that the module can be imported without errors
     from tirajira import main
 
     assert main is not None
 
 
 def test_main_with_empty_argv(monkeypatch, capsys):
-    """Тест: вызов с пустым sys.argv"""
+    """Test: calling with empty sys.argv"""
     monkeypatch.setattr("sys.argv", ["main.py"])
     with pytest.raises(SystemExit) as exc_info:
         main()
-    # Проверяем, что код выхода равен 1
+    # Check that the exit code is 1
     assert exc_info.value.code == 1
 
     captured = capsys.readouterr()
-    # Проверяем наличие ключевых элементов справки
+    # Check for key help elements
     assert "usage: tirajira" in captured.out
     assert "import" in captured.out
     assert "extract-failed" in captured.out
@@ -146,15 +149,15 @@ def test_main_with_empty_argv(monkeypatch, capsys):
 
 
 def test_main_with_help_argument(monkeypatch, capsys):
-    """Тест: вызов с аргументом --help"""
+    """Test: calling with --help argument"""
     monkeypatch.setattr("sys.argv", ["main.py", "--help"])
     with pytest.raises(SystemExit) as exc_info:
         main()
-    # Проверяем, что код выхода равен 0 (успешное завершение для --help)
+    # Check that the exit code is 0 (successful completion for --help)
     assert exc_info.value.code == 0
 
     captured = capsys.readouterr()
-    # Проверяем наличие ключевых элементов справки
+    # Check for key help elements
     assert "usage: tirajira" in captured.out
     assert "import" in captured.out
     assert "extract-failed" in captured.out
@@ -171,14 +174,14 @@ def test_main_with_help_argument(monkeypatch, capsys):
 )
 @patch("tirajira.commands.cli.ImportCommand")
 def test_main_with_file_argument(mock_import_command, monkeypatch):
-    """Тест: вызов с аргументом файла"""
+    """Test: calling with file argument"""
     monkeypatch.setattr("sys.argv", ["main.py", "import", "test.json"])
     mock_import_command_instance = Mock()
     mock_import_command.return_value = mock_import_command_instance
     main()
-    # Проверяем, что ImportCommand был создан и вызван
+    # Check that ImportCommand was created and called
     mock_import_command.assert_called_once()
-    mock_import_command_instance.execute.assert_called_once()
+    mock_import_command_instance.run.assert_called_once()
 
 
 @patch.dict(
@@ -191,16 +194,16 @@ def test_main_with_file_argument(mock_import_command, monkeypatch):
 )
 @patch("tirajira.commands.cli.ImportCommand")
 def test_main_with_batch_size_argument(mock_import_command, monkeypatch):
-    """Тест: вызов с аргументом размера пакета"""
+    """Test: calling with batch size argument"""
     monkeypatch.setattr(
-        "sys.argv", ["main.py", "import", "test.json", "--batch-size", "5"]
+        "sys.argv", ["main.py", "import", "test.json", "--max-concurrent-requests", "5"]
     )
     mock_import_command_instance = Mock()
     mock_import_command.return_value = mock_import_command_instance
     main()
-    # Проверяем, что ImportCommand был создан и вызван
+    # Check that ImportCommand was created and called
     mock_import_command.assert_called_once()
-    mock_import_command_instance.execute.assert_called_once()
+    mock_import_command_instance.run.assert_called_once()
 
 
 @patch.dict(
@@ -213,16 +216,16 @@ def test_main_with_batch_size_argument(mock_import_command, monkeypatch):
 )
 @patch("tirajira.commands.cli.ImportCommand")
 def test_main_with_delay_argument(mock_import_command, monkeypatch):
-    """Тест: вызов с аргументом задержки"""
+    """Test: calling with delay argument"""
     monkeypatch.setattr(
-        "sys.argv", ["main.py", "import", "test.json", "--delay", "2.5"]
+        "sys.argv", ["main.py", "import", "test.json", "--min-request-interval", "2.5"]
     )
     mock_import_command_instance = Mock()
     mock_import_command.return_value = mock_import_command_instance
     main()
-    # Проверяем, что ImportCommand был создан и вызван
+    # Check that ImportCommand was created and called
     mock_import_command.assert_called_once()
-    mock_import_command_instance.execute.assert_called_once()
+    mock_import_command_instance.run.assert_called_once()
 
 
 @patch.dict(
@@ -235,17 +238,25 @@ def test_main_with_delay_argument(mock_import_command, monkeypatch):
 )
 @patch("tirajira.commands.cli.ImportCommand")
 def test_main_with_both_arguments(mock_import_command, monkeypatch):
-    """Тест: вызов с обоими аргументами"""
+    """Test: calling with both arguments"""
     monkeypatch.setattr(
         "sys.argv",
-        ["main.py", "import", "test.json", "--batch-size", "3", "--delay", "0.5"],
+        [
+            "main.py",
+            "import",
+            "test.json",
+            "--max-concurrent-requests",
+            "3",
+            "--min-request-interval",
+            "0.5",
+        ],
     )
     mock_import_command_instance = Mock()
     mock_import_command.return_value = mock_import_command_instance
     main()
-    # Проверяем, что ImportCommand был создан и вызван
+    # Check that ImportCommand was created and called
     mock_import_command.assert_called_once()
-    mock_import_command_instance.execute.assert_called_once()
+    mock_import_command_instance.run.assert_called_once()
 
 
 @patch.dict(
@@ -258,16 +269,16 @@ def test_main_with_both_arguments(mock_import_command, monkeypatch):
 )
 @patch("tirajira.commands.cli.ImportCommand")
 def test_main_with_short_arguments(mock_import_command, monkeypatch):
-    """Тест: вызов с сокращенными аргументами"""
+    """Test: calling with short arguments"""
     monkeypatch.setattr(
-        "sys.argv", ["main.py", "import", "test.json", "-b", "7", "-d", "1.5"]
+        "sys.argv", ["main.py", "import", "test.json", "-mcr", "7", "-mri", "1.5"]
     )
     mock_import_command_instance = Mock()
     mock_import_command.return_value = mock_import_command_instance
     main()
-    # Проверяем, что ImportCommand был создан и вызван
+    # Check that ImportCommand was created and called
     mock_import_command.assert_called_once()
-    mock_import_command_instance.execute.assert_called_once()
+    mock_import_command_instance.run.assert_called_once()
 
 
 @patch.dict(
@@ -280,16 +291,16 @@ def test_main_with_short_arguments(mock_import_command, monkeypatch):
 )
 @patch("tirajira.commands.cli.ImportCommand")
 def test_main_with_stop_on_error_argument(mock_import_command, monkeypatch):
-    """Тест: вызов с аргументом --stop-on-error"""
+    """Test: calling with --stop-on-error argument"""
     monkeypatch.setattr(
         "sys.argv", ["main.py", "import", "test.json", "--stop-on-error"]
     )
     mock_import_command_instance = Mock()
     mock_import_command.return_value = mock_import_command_instance
     main()
-    # Проверяем, что ImportCommand был создан и вызван
+    # Check that ImportCommand was created and called
     mock_import_command.assert_called_once()
-    mock_import_command_instance.execute.assert_called_once()
+    mock_import_command_instance.run.assert_called_once()
 
 
 @patch.dict(
@@ -302,33 +313,42 @@ def test_main_with_stop_on_error_argument(mock_import_command, monkeypatch):
 )
 @patch("tirajira.commands.cli.ImportCommand")
 def test_main_with_all_arguments(mock_import_command, monkeypatch):
-    """Тест: вызов со всеми аргументами"""
+    """Test: calling with all arguments"""
     monkeypatch.setattr(
         "sys.argv",
-        ["main.py", "import", "test.json", "-b", "5", "-d", "2.0", "--stop-on-error"],
+        [
+            "main.py",
+            "import",
+            "test.json",
+            "-mcr",
+            "5",
+            "-mri",
+            "2.0",
+            "--stop-on-error",
+        ],
     )
     mock_import_command_instance = Mock()
     mock_import_command.return_value = mock_import_command_instance
     main()
-    # Проверяем, что ImportCommand был создан и вызван
+    # Check that ImportCommand was created and called
     mock_import_command.assert_called_once()
-    mock_import_command_instance.execute.assert_called_once()
+    mock_import_command_instance.run.assert_called_once()
 
 
 def test_main_successful_execution(monkeypatch):
-    """Тест: проверка успешного выполнения main() без исключений"""
+    """Test: checking successful execution of main() without exceptions"""
 
-    # Создаем фиктивную функцию для cli_main, которая не вызывает исключений
+    # Create a mock function for cli_main that doesn't throw exceptions
     def mock_cli_main():
         pass
 
-    # Патчим cli_main
+    # Patch cli_main
     with patch("tirajira.main.cli_main", side_effect=mock_cli_main):
-        # Проверяем, что main() выполняется без исключений
+        # Check that main() executes without exceptions
         try:
             main()
-            # Если мы здесь, значит исключения не было
+            # If we're here, no exception occurred
             assert True
         except Exception as e:
-            # Если произошло исключение, тест должен провалиться
-            raise AssertionError(f"main() вызвал исключение: {e}") from e
+            # If an exception occurred, the test should fail
+            raise AssertionError(f"main() threw exception: {e}") from e

@@ -1,5 +1,5 @@
 """
-Писатель отчетов в формате XML.
+XML report writer.
 """
 
 import xml.etree.ElementTree as ET
@@ -9,53 +9,53 @@ from .base import ReportWriter
 
 
 class XmlReportWriter(ReportWriter):
-    """Писатель отчетов в формате XML."""
+    """XML report writer."""
 
     def write_report(self, report_data: Dict[str, Any], file_path: str) -> None:
         """
-        Записывает отчет в XML файл.
+        Writes a report to an XML file.
 
         Args:
-            report_data: Данные отчета для записи
-            file_path: Путь к файлу отчета
+            report_data: Report data to write
+            file_path: Path to the report file
         """
-        # Создаем корневой элемент
+        # Create root element
         root = ET.Element("report")
 
-        # Добавляем метаданные
+        # Add metadata
         metadata_element = ET.SubElement(root, "metadata")
         self._dict_to_elements(metadata_element, report_data.get("metadata", {}))
 
-        # Добавляем задачи
+        # Add tasks
         tasks_element = ET.SubElement(root, "tasks")
         for task in report_data.get("tasks", []):
             task_element = ET.SubElement(tasks_element, "task")
             self._dict_to_elements(task_element, task)
 
-        # Создаем дерево XML и записываем в файл
+        # Create XML tree and write to file
         tree = ET.ElementTree(root)
 
-        # Форматируем XML для лучшей читаемости
+        # Format XML for better readability
         self._indent(root)
 
-        # Записываем в файл
+        # Write to file
         tree.write(file_path, encoding="utf-8", xml_declaration=True)
 
     def _dict_to_elements(self, parent: ET.Element, data: Dict[str, Any]) -> None:
         """
-        Преобразует словарь в элементы XML.
+        Converts a dictionary to XML elements.
 
         Args:
-            parent: Родительский элемент XML
-            data: Словарь для преобразования
+            parent: Parent XML element
+            data: Dictionary to convert
         """
         for key, value in data.items():
             if isinstance(value, dict):
-                # Для вложенных словарей создаем отдельный элемент
+                # For nested dictionaries, create a separate element
                 element = ET.SubElement(parent, key)
                 self._dict_to_elements(element, value)
             elif isinstance(value, list):
-                # Для списков создаем отдельный элемент для каждого элемента
+                # For lists, create a separate element for each item
                 list_element = ET.SubElement(parent, key)
                 for item in value:
                     if isinstance(item, dict):
@@ -65,17 +65,17 @@ class XmlReportWriter(ReportWriter):
                         item_element = ET.SubElement(list_element, "item")
                         item_element.text = str(item)
             else:
-                # Для простых значений создаем элемент с текстом
+                # For simple values, create an element with text
                 element = ET.SubElement(parent, key)
                 element.text = str(value) if value is not None else ""
 
     def _indent(self, elem: ET.Element, level: int = 0) -> None:
         """
-        Добавляет отступы для форматирования XML.
+        Adds indentation for formatting XML.
 
         Args:
-            elem: Элемент XML для форматирования
-            level: Уровень отступа
+            elem: XML element to format
+            level: Indentation level
         """
         indent = "\n" + level * "  "
         if len(elem):

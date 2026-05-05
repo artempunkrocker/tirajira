@@ -1,84 +1,83 @@
 """
-Главный скрипт для автоматизации создания задач в Jira.
-Поддерживает создание задач по списку из файла (JSON/YAML/CSV/Excel).
+Main script for automating Jira task creation.
+Supports creating tasks from a list in a file (JSON/YAML/CSV/Excel).
 """
 
 import sys
 from typing import Optional
 
-from .batch_processor import BatchProcessor
-
-# Импортируем необходимые классы для совместимости с тестами
+# Import necessary classes for compatibility with tests
 from .commands.cli import main as cli_main
-from .jira_client import JiraClient
+from .core.rate_limiter import RateLimiter
+from .integrations.jira_client import JiraClient
 from .logger import get_logger
-from .task_creator import TaskCreator
+from .processing.task_creator import TaskCreator
 
 
 def create_tasks_from_file(
     file_path: str,
-    batch_size: int = 10,
-    delay: float = 1.0,
+    max_concurrent_requests: int = 10,
+    min_request_interval: float = 1.0,
     stop_on_error: bool = False,
     verbose: bool = False,
     report_file: Optional[str] = None,
 ) -> None:
     """
-    Создание задач на основе списка из файла.
+    Create tasks based on a list from a file.
 
     Args:
-        file_path: Путь к файлу с задачами.
-        batch_size: Размер пакета для обработки задач.
-        delay: Задержка между пакетами в секундах.
-        stop_on_error: Прекратить обработку при возникновении ошибки.
-        verbose: Флаг подробного режима логирования.
-        report_file: Путь к файлу отчета (None - не сохранять отчет,
-                    True - автоматически сгенерировать имя файла,
-                    str - использовать указанное имя файла).
+        file_path: Path to the file with tasks.
+        max_concurrent_requests: Maximum number of concurrent requests.
+        min_request_interval: Minimum interval between requests in seconds.
+        stop_on_error: Stop processing when an error occurs.
+        verbose: Verbose logging mode flag.
+        report_file: Path to the report file (None - don't save report,
+                    True - automatically generate filename,
+                    str - use specified filename).
     """
-    # Инициализация логгера
+    # Initialize logger
     logger = get_logger()
     logger.set_verbose(verbose)
 
     try:
-        # Инициализация клиента Jira
+        # Initialize Jira client
         jira_client = JiraClient(verbose=verbose)
 
-        # Инициализация процессора пакетов
-        batch_processor = BatchProcessor(
+        # Initialize rate limiter
+        rate_limiter = RateLimiter(
             jira_client,
-            batch_size=batch_size,
-            delay=delay,
+            max_concurrent_requests=max_concurrent_requests,
+            min_request_interval=min_request_interval,
             stop_on_error=stop_on_error,
             verbose=verbose,
         )
 
-        # Инициализация создателя задач
+        # Initialize task creator
         task_creator = TaskCreator(
-            jira_client=jira_client, batch_processor=batch_processor, verbose=verbose
+            jira_client=jira_client, rate_limiter=rate_limiter, verbose=verbose
         )
 
-        # Создаем задачи
+        # Create tasks
         task_creator.create_from_file(
             file_path=file_path,
-            batch_size=batch_size,
-            delay=delay,
+            max_concurrent_requests=max_concurrent_requests,
+            min_request_interval=min_request_interval,
             stop_on_error=stop_on_error,
             verbose=verbose,
             report_file=report_file,
         )
 
     except Exception as e:
-        logger.error(f"Ошибка при создании задач: {e}")
+        logger.error(f"Error creating tasks: {e}")
         sys.exit(1)
 
 
 def main() -> None:
-    """Основная точка входа в приложение."""
-    # Используем новый CLI интерфейс
+    """Main entry point for the application."""
+    # Use the new CLI interface
     cli_main()
 
 
 if __name__ == "__main__":
     main()
-    sys.exit(0)  # Выходим с кодом 0 если всё прошло успешно
+    sys.exit(0)  # Exit with code 0 if everything went successfully

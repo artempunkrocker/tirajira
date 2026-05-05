@@ -1,27 +1,37 @@
 """
-TiraJira - инструмент для автоматизации массового создания задач в Jira.
+TiraJira - a tool for automating mass task creation in Jira.
 
-Модуль позволяет создавать задачи в Jira из файлов JSON, YAML, CSV или Excel.
-Поддерживает привязку задач к эпикам и логирование процесса создания задач.
+The module allows creating tasks in Jira from JSON, YAML, CSV, or Excel files.
+Supports linking tasks to epics and logging the task creation process.
 """
 
 __version__ = "1.0.0"
 
-from .batch_processor import BatchProcessor
 from .commands import BaseCommand, ExtractFailedCommand, ImportCommand, ResumeCommand
 
-# Импортируем основные классы и функции для удобства использования
+# Import main classes and functions for convenience of use
 from .commands.argument_parser import ArgumentParser
+from .core.concurrency_manager import ConcurrencyManager
+from .core.rate_limit_controller import RateLimitController
+from .core.rate_limiter import RateLimiter
 from .file_loaders import create_file_loader
-from .jira_client import JiraClient
+from .integrations.jira_client import JiraClient
+from .integrations.jira_client_interface import JiraClientInterface
 from .main import create_tasks_from_file
-from .task_creator import TaskCreator
+from .processing.report_generator import ReportGenerator
+from .processing.task_creator import TaskCreator
+from .processing.task_processor import TaskProcessor
 
 __all__ = [
     "ArgumentParser",
-    "BatchProcessor",
+    "ConcurrencyManager",
     "JiraClient",
+    "JiraClientInterface",
+    "RateLimiter",
+    "RateLimitController",
+    "ReportGenerator",
     "TaskCreator",
+    "TaskProcessor",
     "create_file_loader",
     "create_tasks_from_file",
     "BaseCommand",

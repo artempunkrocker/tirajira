@@ -219,5 +219,4 @@ __marimo__/
 .env
 .coverage
 
-# Example files
-example_tasks.json
+.sisyphus

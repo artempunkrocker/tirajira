@@ -1,0 +1,92 @@
+[
+  {
+    "project": {"key": "GBO"},
+    "summary": "Setup CI/CD for Alpha project",
+    "description": "Configure continuous integration and delivery for Alpha project",
+    "issuetype": {"name": "Task"},
+    "assignee": {"name": "avasilyev"},
+    "priority": {"name": "High"},
+    "epic_key": "GBO-153010"
+  },
+  {
+    "project": {"key": "GBO"},
+    "summary": "Implement user authentication module",
+    "description": "Create and integrate user authentication system with login, logout, and password recovery features",
+    "issuetype": {"name": "Task"},
+    "assignee": {"name": "avasilyev"},
+    "priority": {"name": "High"},
+    "epic_key": "GBO-153010"
+  },
+  {
+    "project": {"key": "GBO"},
+    "summary": "Design database schema for user profiles",
+    "description": "Create comprehensive database schema for storing user profile information and preferences",
+    "issuetype": {"name": "Task"},
+    "assignee": {"name": "avasilyev"},
+    "priority": {"name": "Medium"},
+    "epic_key": "GBO-153010"
+  },
+  {
+    "project": {"key": "GBO"},
+    "summary": "Develop REST API for user management",
+    "description": "Build RESTful API endpoints for creating, reading, updating, and deleting user accounts",
+    "issuetype": {"name": "Task"},
+    "assignee": {"name": "avasilyev"},
+    "priority": {"name": "High"},
+    "epic_key": "GBO-153010"
+  },
+  {
+    "project": {"key": "GBO"},
+    "summary": "Create unit tests for authentication service",
+    "description": "Write comprehensive unit tests to validate authentication service functionality and edge cases",
+    "issuetype": {"name": "Task"},
+    "assignee": {"name": "avasilyev"},
+    "priority": {"name": "Medium"},
+    "epic_key": "GBO-153010"
+  },
+  {
+    "project": {"key": "GBO"},
+    "summary": "Optimize database queries for user search",
+    "description": "Analyze and improve performance of database queries used in user search functionality",
+    "issuetype": {"name": "Task"},
+    "assignee": {"name": "avasilyev"},
+    "priority": {"name": "Low"},
+    "epic_key": "GBO-153010"
+  },
+  {
+    "project": {"key": "GBO"},
+    "summary": "Update documentation for user management API",
+    "description": "Revise and update API documentation to reflect latest changes in user management endpoints",
+    "issuetype": {"name": "Task"},
+    "assignee": {"name": "avasilyev"},
+    "priority": {"name": "Low"},
+    "epic_key": "GBO-153010"
+  },
+  {
+    "project": {"key": "GBO"},
+    "summary": "Implement email notifications for account events",
+    "description": "Set up automated email notifications for important account activities like registration and password changes",
+    "issuetype": {"name": "Task"},
+    "assignee": {"name": "avasilyev"},
+    "priority": {"name": "Medium"},
+    "epic_key": "GBO-153010"
+  },
+  {
+    "project": {"key": "GBO"},
+    "summary": "Integrate third-party logging service",
+    "description": "Connect application with external logging service for improved monitoring and debugging capabilities",
+    "issuetype": {"name": "Task"},
+    "assignee": {"name": "avasilyev"},
+    "priority": {"name": "Low"},
+    "epic_key": "GBO-153010"
+  },
+  {
+    "project": {"key": "GBO"},
+    "summary": "Perform security audit on authentication module",
+    "description": "Conduct comprehensive security review of authentication implementation to identify vulnerabilities",
+    "issuetype": {"name": "Task"},
+    "assignee": {"name": "avasilyev"},
+    "priority": {"name": "High"},
+    "epic_key": "GBO-153010"
+  }
+]

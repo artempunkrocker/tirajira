@@ -1,5 +1,5 @@
 """
-Писатель отчетов в формате YAML.
+YAML report writer.
 """
 
 from typing import Any, Dict
@@ -10,15 +10,15 @@ from .base import ReportWriter
 
 
 class YamlReportWriter(ReportWriter):
-    """Писатель отчетов в формате YAML."""
+    """YAML report writer."""
 
     def write_report(self, report_data: Dict[str, Any], file_path: str) -> None:
         """
-        Записывает отчет в YAML файл.
+        Writes a report to a YAML file.
 
         Args:
-            report_data: Данные отчета для записи
-            file_path: Путь к файлу отчета
+            report_data: Report data to write
+            file_path: Path to the report file
         """
         with open(file_path, "w", encoding="utf-8") as f:
             yaml.dump(report_data, f, allow_unicode=True, indent=2, sort_keys=False)

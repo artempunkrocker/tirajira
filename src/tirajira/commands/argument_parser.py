@@ -1,5 +1,5 @@
 """
-Модуль для парсинга аргументов командной строки.
+Module for parsing command line arguments.
 """
 
 import argparse
@@ -10,98 +10,94 @@ from .help_manager import display_help
 
 
 class ArgumentParser:
-    """Класс для парсинга аргументов командной строки."""
+    """Class for parsing command line arguments."""
 
     def __init__(self) -> None:
-        """Инициализирует парсер аргументов."""
+        """Initializes the argument parser."""
         self.parser = argparse.ArgumentParser(
-            description="TiraJira - инструмент для автоматизации создания задач в Jira",
+            description="TiraJira - tool for automating task creation in Jira",
             add_help=False,
         )
         self._add_arguments()
 
     def _add_arguments(self) -> None:
-        """Добавляет аргументы к парсеру."""
-        self.parser.add_argument("file_path", nargs="?", help="Путь к файлу с задачами")
+        """Adds arguments to the parser."""
+        self.parser.add_argument("file_path", nargs="?", help="Path to the task file")
         self.parser.add_argument(
-            "--batch-size",
-            "-b",
+            "--max-concurrent-requests",
+            "-mcr",
             type=int,
             default=10,
-            help="Размер пакета для обработки задач (по умолчанию: 10)",
+            help="Maximum number of concurrent requests (default: 10)",
         )
         self.parser.add_argument(
-            "--delay",
-            "-d",
+            "--min-request-interval",
+            "-mri",
             type=float,
             default=1.0,
-            help="Задержка между пакетами в секундах (по умолчанию: 1.0)",
+            help="Minimum interval between requests in seconds (default: 1.0)",
         )
         self.parser.add_argument(
             "--stop-on-error",
             action="store_true",
-            help="Прекратить обработку при возникновении ошибки",
+            help="Stop processing on error",
         )
         self.parser.add_argument(
-            "--verbose", action="store_true", help="Включить подробный режим вывода"
+            "--verbose", action="store_true", help="Enable verbose output mode"
         )
         self.parser.add_argument(
             "--report",
             nargs="?",
             const=True,
             default=None,
-            help="Сохранить отчет о выполнении (если указан без значения, "
-            "имя файла генерируется автоматически)",
+            help="Save execution report (if specified without value, "
+            "filename is generated automatically)",
         )
-        self.parser.add_argument(
-            "--help", "-h", action="store_true", help="Показать помощь"
-        )
-        self.parser.add_argument(
-            "--version", action="store_true", help="Показать версию"
-        )
+        self.parser.add_argument("--help", "-h", action="store_true", help="Show help")
+        self.parser.add_argument("--version", action="store_true", help="Show version")
 
     def parse(self) -> argparse.Namespace:
         """
-        Парсит аргументы командной строки.
+        Parses command line arguments.
 
         Returns:
-            Namespace с распарсенными аргументами.
+            Namespace with parsed arguments.
         """
         return self.parser.parse_args()
 
     def handle_special_args(self, args: argparse.Namespace) -> bool:
         """
-        Обрабатывает специальные аргументы (--help, --version).
+        Handles special arguments (--help, --version).
 
         Args:
-            args: Распарсенные аргументы.
+            args: Parsed arguments.
 
         Returns:
-            True, если была выполнена специальная команда (help или version),
-            иначе False.
+            True if a special command (help or version) was executed,
+            otherwise False.
         """
-        if args.help or (len(sys.argv) == 1 and not args.file_path):
-            display_help()
-            return True
-
         if args.version:
             print(f"TiraJira version {__version__}")
+            return True
+
+        if args.help or (len(sys.argv) == 1 and not args.file_path):
+            display_help()
             return True
 
         return False
 
     def validate_args(self, args: argparse.Namespace) -> bool:
         """
-        Валидирует аргументы.
+        Validates arguments.
 
         Args:
-            args: Распарсенные аргументы.
+            args: Parsed arguments.
 
         Returns:
-            True, если аргументы валидны, иначе False.
+            True if arguments are valid, otherwise False.
         """
         if not args.file_path:
-            print("Ошибка: Не указан путь к файлу с задачами")
+            print("Error: No path to task file specified")
             display_help()
             return False
         return True

@@ -1,3 +1,3 @@
 """
-Тесты для модуля report_writers.
+Tests for the report_writers module.
 """

@@ -1,226 +1,174 @@
 # Project overview
 
-TiraJira (тиражира) - это инструмент для автоматизации массового создания задач в Jira. Он позволяет создавать задачи из файлов с поддержкой привязки к эпику и логированием.
+TiraJira - tool for automating mass task creation in Jira. It allows creating tasks from files with epic linking and logging support.
 
-Основные возможности:
+Key features:
+- Creating tasks from JSON/YAML/CSV/XML/Excel files
+- Support for linking tasks to epics
+- Logging the task creation process
+- Request rate limiting to prevent exceeding API limits
+- Support for custom Jira fields
 
-- Создание задач из файлов JSON/YAML/CSV/XML/Excel
-- Поддержка привязки задач к эпикам
-- Логирование процесса создания задач
-- Пакетная обработка задач для повышения эффективности
-- Поддержка кастомных полей Jira
+The project is written in Python 3.8+ and uses the official `jira` package to work with the API.
 
-Проект написан на Python 3.8+ и использует официальный пакет `jira` для работы с API.
+# Development setup
 
-# Development conventions
+## Requirements
+- Python 3.8+
+- Poetry 1.2+
+- Git 2.20+
 
-**Отвечай только на русском языке!**
+Supported OS: Linux, macOS, Windows (WSL2)
 
-## Язык программирования и версия
-
-- Используется Python 3.8+
-- Все команды запускаются с префиксом `python3`
-
-## Управление зависимостями
-
-- Зависимости управляются через Poetry (основной инструмент) и `requirements.txt` (для совместимости)
-- Установка через Poetry: `poetry install`
-- Установка через pip (для совместимости): `pip3 install -r requirements.txt`
-- Основные зависимости:
-  - `jira` - официальный клиент Jira API
-  - `python-dotenv` - работа с переменными окружения
-  - `PyYAML` - работа с YAML файлами
-  - `tqdm` - прогресс-бары
-  - `openpyxl` - работа с Excel файлами
-  - `flatdict` - работа со словарями
-- Зависимости для разработки:
-  - `pytest` и `coverage` - для тестирования
-  - `ruff` - для линтинга и форматирования кода
-
-## Форматирование кода
-
-- Форматирование и сортировка импортов осуществляются через Ruff (настроено в pyproject.toml)
-- Максимальная длина строки: 88 символов
-
-## Сборка проекта
-
-- Сборка осуществляется с помощью Poetry
-- Для локальной разработки используется Poetry для управления зависимостями
-- Для совместимости с традиционными подходами сохраняется файл requirements.txt
-- Сборка дистрибутивов (wheel, sdist): `poetry build`
-- Публикация на PyPI: `poetry publish`
-
-## Версионирование
-
-Проект использует автоматическое версионирование на основе [Conventional Commits](https://www.conventionalcommits.org/) с помощью [poetry-dynamic-versioning](https://github.com/mtkennerly/poetry-dynamic-versioning).
-
-Версия формируется автоматически на основе истории коммитов и тегов Git. При сборке пакета Poetry будет использовать актуальную версию, рассчитанную на основе ваших коммитов.
-
-Для помощи в создании коммитов в правильном формате можно использовать утилиту commitizen:
-
+## Installation
 ```bash
-# Установка commitizen (опционально)
-pip3 install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org commitizen
+# Installing dependencies
+poetry install
 
-# Создание коммита в формате Conventional Commits
-cz commit
+# Activating virtual environment
+poetry shell
 ```
 
-Если у вас возникают проблемы с установкой через Poetry из-за конфликтов зависимостей, вы можете установить commitizen глобально в вашей системе, как показано выше.
+Main dependencies are defined in pyproject.toml.
 
-## Структура проекта
+# Code standards
 
-- `src/` - основной каталог с исходным кодом
-  - `tirajira/` - основной пакет приложения
-    - `auth/` - пакет для аутентификации в Jira API
-    - `commands/` - пакет для реализации команд CLI (всё, что связано с командной строкой)
-    - `file_loaders/` - пакет для загрузки данных из файлов различных форматов
-    - `report_writers/` - пакет для записи отчетов
-    - `utils/` - вспомогательные функции
-    - `batch_processor.py` - пакетная обработка задач
-    - `jira_client.py` - взаимодействие с Jira API
-    - `logger.py` - модуль централизованного логирования
-    - `main.py` - точка входа с обработкой аргументов командной строки
-    - `task_creator.py` - создание задач из файлов
+## Formatting
+- Formatting via Ruff (configured in pyproject.toml)
+- Maximum line length: 88 characters
+- Import sorting: isort
 
-### Структура папки commands
+## Naming conventions
+- Variables and functions: snake_case
+- Classes: PascalCase
+- Constants: UPPER_SNAKE_CASE
+- Private elements: _private_attribute
 
-Все файлы, связанные с командной строкой и CLI, должны находиться в папке `commands/`:
-- Реализация CLI интерфейса
-- Парсер аргументов командной строки
-- Команды приложения
-- Управление справкой и документацией командной строки
-- `requirements.txt` - зависимости Python
-- `tests/` - unit-тесты
+## Documentation
+- All public functions, classes and methods must have docstrings in Russian
+- Following Google Python Style Guide format
+- Complex logic should be commented
+
+## Design patterns
+- Using factories for object creation
+- Applying strategy for algorithms
+- Following SOLID, DRY, KISS principles
+
+# Project structure
+
+```
+src/tirajira/
+├── auth/               # Jira API authentication
+├── commands/           # CLI commands
+├── core/               # Core system components
+├── file_loaders/       # Loaders for different file formats
+├── integrations/       # Integrations with external systems
+├── processing/         # Task processing and report generation
+├── report_writers/     # Report generators
+├── utils/              # Utility functions
+├── exceptions.py           # Project-wide exceptions
+├── logger.py               # Logging
+└── main.py                 # Entry point
+```
 
 # Testing
 
-## Фреймворк тестирования
+## Framework
+- pytest for testing
+- coverage.py for measuring coverage
+- Minimum coverage: 90% (see pyproject.toml)
 
-- Используется pytest
-- Измеряется покрытие через coverage.py
+## Best practices
+- One assert per test
+- Using mocks for external dependencies
+- Using mocks when working with the file system
+- Using mocks for console calls (print, logging, etc.)
+- Tests follow the src/ structure
+- All new functions must have tests
 
-## Команды тестирования
-
+## Commands
 ```bash
-# Запуск всех тестов
+# Running tests
 pytest
 
-# Запуск конкретного файла
-pytest tests/test_main.py
-
-# Запуск с отображением покрытия
+# Checking coverage
 pytest --cov=.
 
-# Генерация текстового отчета о покрытии
-coverage report
-
-# Генерация HTML отчета о покрытии (в папке htmlcov/)
-coverage html
-
-# Проверка минимального покрытия (90%)
-pytest --cov=. --cov-fail-under=90
-
-# Линтинг кода с помощью Ruff
+# Linting
 ruff check .
-
-# Автоформатирование кода с помощью Ruff
-ruff format .
-
-# Сборка пакета (wheel и sdist)
-poetry build
-
-# Публикация пакета на PyPI
-poetry publish
 ```
 
-## Особенности тестов
+## Testing Components with Timers
 
-- Используются моки для внешних сервисов (Jira API)
-- Используй моки для работы с файловой системой
-- Структура тестов внутри папки tests должна соответствать структуре папок в src
-- Тесты покрывают все основные модули проекта
-- Для тестирования командной строки используются патчи sys.argv
-- Все новые функции должны сопровождаться тестами
+When testing components that use timers or time functions (`time.time()`, `time.sleep()`), it's important to properly mock them to ensure deterministic and fast test execution.
 
-# Build & deploy
+### Recommendations for mocking time functions
 
-## Локальная установка
+1. Always use mocks for `time.time()` and `time.sleep()` in tests for time-dependent components
+2. Set `min_request_interval=0` in tests to eliminate artificial delays
+3. Use `@patch("time.time")` and `@patch("time.sleep")` decorators to replace real functions
 
-1. Убедиться, что установлен Python 3.8+
-2. Создать и активировать виртуальное окружение:
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate  # Linux/Mac
-   # venv\Scripts\activate  # Windows
-   ```
-3. Установить зависимости:
-   ```bash
-   pip3 install -r requirements.txt
-   ```
+### Examples of proper mock usage
 
-### Альтернативная установка через Poetry (рекомендуется для разработки)
+```python
+# Proper mock usage for time.time()
+@patch("time.time")
+def test_rate_limiter_with_time_mock(self, mock_time):
+    # Setting a fixed time value
+    mock_time.return_value = 1000.0
+    
+    # Creating RateLimiter with minimum interval 0 for tests
+    limiter = RateLimiter(min_request_interval=0)
+    
+    # Running the test
+    result = limiter.process()
+    
+    # Checking the result
+    self.assertIsNotNone(result)
 
-1. Убедиться, что установлен Python 3.8+
-2. Установить Poetry (https://python-poetry.org/docs/#installation)
-3. Установить зависимости:
-   ```bash
-   poetry install
-   ```
-4. Активировать виртуальное окружение Poetry:
-   ```bash
-   poetry shell
-   ```
-
-### Примеры файлов с задачами
-
-#### JSON формат (example_tasks.json):
-
-```json
-[
-  {
-    "project": { "key": "PROJ" },
-    "summary": "Настройка CI/CD для проекта Альфа",
-    "description": "Настроить непрерывную интеграцию и доставку для проекта Альфа",
-    "issuetype": { "name": "Task" },
-    "assignee": { "emailAddress": "developer@example.com" },
-    "priority": { "name": "High" },
-    "epic_key": "PROJ-100",
-    "customfield_10001": "Бизнес-ценность: Высокая",
-    "labels": ["urgent", "devops"]
-  }
-]
+# Proper mock usage for time.sleep()
+@patch("time.sleep")
+def test_rate_limiter_sleep_behavior(self, mock_sleep):
+    # Creating RateLimiter with minimum interval 0 for tests
+    limiter = RateLimiter(min_request_interval=0)
+    
+    # Running the test
+    limiter.process()
+    
+    # Checking that sleep was not called
+    mock_sleep.assert_not_called()
 ```
 
-## Поток данных
+### Best practices
 
-1. Пользователь запускает команду с указанием пути к файлу
-2. main.py определяет тип файла и создает соответствующий загрузчик
-3. file_loader.py загружает задачи из файла
-4. batch_processor.py группирует задачи и отправляет их через jira_client.py
-5. task_creator.py собирает результаты обработки задач
-6. При необходимости, task_creator.py сохраняет отчет через report_writers/
-7. Результаты логируются и выводятся пользователю
+- Never use real time values in tests - always mock `time.time()`
+- Set fixed values for time mocks for reproducible tests
+- Use `min_request_interval=0` in tests for faster execution
+- Check component behavior at different time values by changing mock return values
+- Always check that mocks were called with the correct arguments
 
-# Do's and Don'ts
+# Workflow
 
-## Do's
+## Data flow
+1. User runs command with file
+2. main.py determines file type and creates loader
+3. file_loader loads tasks
+4. rate_limiter (from core/) controls request rate through jira_client (from integrations/)
+5. task_creator (from processing/) collects results and saves reports
+6. Results are logged
 
-- ✅ Используйте JSON, YAML, CSV или Excel файлы для создания задач
-- ✅ Настраивайте переменные окружения через .env файл
-- ✅ Запускайте тесты перед внесением изменений: `pytest`
-- ✅ Проверяйте покрытие кода тестами: `coverage report`
-- ✅ Следуйте принятому стилю кодирования (Ruff)
-- ✅ Соблюдай SOLID, DRY, KISS
-- ✅ Логгируйте важные этапы выполнения для диагностики проблем
-- ✅ Обрабатывайте ошибки API с понятными сообщениями для пользователя
-- ✅ Прогоняйте линтинг Ruff после каждого изменения файла: `ruff check .`
+## Security
 
-## Don'ts
+### Best practices
+- Don't store credentials in code
+- Use environment variables
+- Don't commit .env files
+- Don't write tokens to logs
 
-- ❌ Не делай коммиты в git
-- ❌ Не храните учетные данные в коде или в коммитах
-- ❌ Не игнорируйте ошибки API - они должны корректно обрабатываться
-- ❌ Не добавляйте чувствительную информацию в логи
-- ❌ Не используйте жестко закодированные значения вместо переменных окружения
-- ❌ Не забывайте про валидацию входных данных перед обработкой
+## Performance
+
+### Optimization
+- Use generators to save memory
+- Optimize packet size
+- Minimize API calls
+- Use caching

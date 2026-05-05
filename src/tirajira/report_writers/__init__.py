@@ -1,5 +1,5 @@
 """
-Пакет для создания отчетов в различных форматах.
+Package for creating reports in various formats.
 """
 
 from .csv_writer import CsvReportWriter

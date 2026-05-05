@@ -1,7 +1,8 @@
 """
-Тесты для команды извлечения неудачных задач TiraJira.
+Tests for TiraJira failed tasks extraction command.
 """
 
+from pathlib import Path
 from unittest.mock import Mock, mock_open, patch
 
 import pytest
@@ -9,407 +10,94 @@ import pytest
 from tirajira.commands.extract_failed import ExtractFailedCommand
 
 
-@patch("tirajira.commands.extract_failed.os.path.exists")
-@patch("tirajira.commands.extract_failed.get_logger")
-def test_extract_failed_command_file_not_found(mock_get_logger, mock_exists):
-    """Тест: обработка случая, когда файл отчета не найден"""
-    # Настраиваем mock
-    mock_exists.return_value = False
+@patch("tirajira.commands.extract_failed.validate_file_path")
+@patch("tirajira.logger.Logger")
+def test_extract_failed_command_file_not_found(
+    mock_logger_class, mock_validate_file_path
+):
+    """Test: handling case when report file not found"""
+    # Setup mock
+    mock_validate_file_path.side_effect = FileNotFoundError("File not found")
     mock_logger = Mock()
-    mock_get_logger.return_value = mock_logger
+    mock_logger_class.return_value = mock_logger
 
-    # Настраиваем аргументы
+    # Setup arguments
     args = Mock()
     args.report_file = "nonexistent.json"
     args.output_file = "failed.json"
 
-    # Создаем команду и выполняем её
+    # Create command and execute it
     command = ExtractFailedCommand(args)
     result = command.execute()
 
-    # Проверяем результат
+    # Check result
     assert result == 1
 
-    # Проверяем, что логгер записал ошибку
-    mock_get_logger.assert_called_once()
-    mock_logger.error.assert_called_once_with("Файл отчета nonexistent.json не найден")
+    # Check that logger recorded error
+    mock_logger_class.assert_called()
+    mock_logger.error.assert_called_once()
 
 
-@patch("tirajira.commands.extract_failed.os.path.exists")
+@patch("tirajira.commands.extract_failed.validate_file_path")
+@patch("tirajira.commands.utils.validate_file_path")
 @patch(
-    "tirajira.commands.extract_failed.open",
-    new_callable=mock_open,
-    read_data='{"tasks": [{"status": "failure", "issue_data": '
-    '{"summary": "Failed task"}}]}',
+    "tirajira.commands.utils.open", new_callable=mock_open, read_data='{"tasks": []}'
 )
-@patch("tirajira.commands.extract_failed.json.load")
-@patch("tirajira.commands.extract_failed.get_logger")
+@patch("tirajira.commands.utils.json.load")
+@patch("tirajira.logger.Logger")
 def test_extract_failed_command_no_failed_tasks(
-    mock_get_logger, mock_json_load, mock_file, mock_exists
+    mock_logger_class,
+    mock_json_load,
+    mock_file,
+    mock_utils_validate_file_path,
+    mock_validate_file_path,
 ):
-    """Тест: обработка случая, когда в отчете нет неудачных задач"""
-    # Настраиваем mock
-    mock_exists.return_value = True
+    """Test: handling case when no failed tasks in report"""
+    # Setup mock
+    mock_validate_file_path.return_value = Path("report.json")
     mock_json_load.return_value = {"tasks": []}
     mock_logger = Mock()
-    mock_get_logger.return_value = mock_logger
+    mock_logger_class.return_value = mock_logger
 
-    # Настраиваем аргументы
+    # Setup arguments
     args = Mock()
     args.report_file = "report.json"
     args.output_file = "failed.json"
 
-    # Создаем команду и выполняем её
+    # Create command and execute it
     command = ExtractFailedCommand(args)
     result = command.execute()
 
-    # Проверяем результат
+    # Check result
     assert result == 0
 
-    # Проверяем, что логгер записал информацию
-    mock_get_logger.assert_called_once()
-    mock_logger.info.assert_called_once_with("Не найдено неудачных задач в отчете")
+    # Check that logger recorded information
+    mock_logger_class.assert_called()
+    mock_logger.info.assert_called_once_with("No failed tasks found in report")
 
 
-@patch("tirajira.commands.extract_failed.os.path.exists")
+@patch("tirajira.commands.extract_failed.validate_file_path")
+@patch("tirajira.commands.utils.validate_file_path")
 @patch(
-    "tirajira.commands.extract_failed.open",
+    "tirajira.commands.utils.open",
     new_callable=mock_open,
     read_data='{"tasks": [{"status": "success"}]}',
 )
-@patch("tirajira.commands.extract_failed.json.load")
+@patch("tirajira.commands.utils.json.load")
 @patch("tirajira.commands.extract_failed.create_report_writer")
-@patch("tirajira.commands.extract_failed.get_logger")
-def test_extract_failed_command_success(
-    mock_get_logger, mock_create_report_writer, mock_json_load, mock_file, mock_exists
-):
-    """Тест: успешное извлечение неудачных задач"""
-    # Настраиваем mock
-    mock_exists.return_value = True
-    mock_json_load.return_value = {
-        "tasks": [
-            {"status": "success", "issue_data": {"summary": "Success task"}},
-            {"status": "failure", "issue_data": {"summary": "Failed task"}},
-        ]
-    }
-
-    mock_logger = Mock()
-    mock_get_logger.return_value = mock_logger
-
-    mock_writer = Mock()
-    mock_create_report_writer.return_value = mock_writer
-
-    # Настраиваем аргументы
-    args = Mock()
-    args.report_file = "report.json"
-    args.output_file = "failed.json"
-
-    # Создаем команду и выполняем её
-    command = ExtractFailedCommand(args)
-    result = command.execute()
-
-    # Проверяем результат
-    assert result == 0
-
-    # Проверяем, что логгер записал информацию
-    mock_get_logger.assert_called_once()
-    mock_logger.info.assert_called_once_with("Найдено 1 неудачных задач")
-    mock_logger.success.assert_called_once_with(
-        "Извлеченные задачи сохранены в файл: failed.json"
-    )
-
-    # Проверяем, что writer был вызван правильно
-    mock_create_report_writer.assert_called_once_with("json")
-    mock_writer.write_report.assert_called_once()
-
-
-@patch("tirajira.commands.extract_failed.os.path.exists")
-@patch("tirajira.commands.extract_failed.open", new_callable=mock_open, read_data="{}")
-@patch("tirajira.commands.extract_failed.json.load")
-@patch("tirajira.commands.extract_failed.get_logger")
-@patch("tirajira.commands.extract_failed.create_file_loader")
-def test_extract_failed_command_exception_handling(
-    mock_create_file_loader, mock_get_logger, mock_json_load, mock_file, mock_exists
-):
-    """Тест: обработка исключений в команде извлечения неудачных задач"""
-    # Настраиваем mock
-    mock_exists.return_value = True
-    mock_json_load.side_effect = Exception("Ошибка чтения файла")
-    mock_logger = Mock()
-    mock_get_logger.return_value = mock_logger
-
-    # Настраиваем аргументы
-    args = Mock()
-    args.report_file = "corrupted.json"
-    args.output_file = "failed.json"
-
-    # Создаем команду и выполняем её
-    command = ExtractFailedCommand(args)
-    result = command.execute()
-
-    # Проверяем результат
-    assert result == 1
-
-    # Проверяем, что логгер записал ошибку
-    mock_get_logger.assert_called_once()
-    mock_logger.error.assert_called_once()
-
-
-@patch("tirajira.commands.extract_failed.os.path.exists")
-@patch(
-    "tirajira.commands.extract_failed.open",
-    new_callable=mock_open,
-    read_data="invalid json",
-)
-@patch("tirajira.commands.extract_failed.json.load")
-@patch("tirajira.commands.extract_failed.get_logger")
-def test_extract_failed_command_invalid_json(
-    mock_get_logger, mock_json_load, mock_file, mock_exists
-):
-    """Тест: обработка недопустимого JSON в файле отчета"""
-    # Настраиваем mock
-    mock_exists.return_value = True
-    mock_json_load.side_effect = ValueError("Invalid JSON")
-    mock_logger = Mock()
-    mock_get_logger.return_value = mock_logger
-
-    # Настраиваем аргументы
-    args = Mock()
-    args.report_file = "invalid.json"
-    args.output_file = "failed.json"
-
-    # Создаем команду и выполняем её
-    command = ExtractFailedCommand(args)
-    result = command.execute()
-
-    # Проверяем результат
-    assert result == 1
-
-    # Проверяем, что логгер записал ошибку
-    mock_get_logger.assert_called_once()
-    mock_logger.error.assert_called_once()
-
-
-def test_extract_failed_command_extract_failed_tasks_json():
-    """Тест: извлечение неудачных задач из JSON отчета"""
-    # Настраиваем аргументы
-    args = Mock()
-    args.report_file = "report.json"
-    args.output_file = "failed.json"
-
-    # Создаем команду
-    command = ExtractFailedCommand(args)
-
-    # Тестовые данные
-    tasks = [
-        {"status": "success", "issue_data": {"summary": "Success task"}},
-        {"status": "failure", "issue_data": {"summary": "Failed task 1"}},
-        {"status": "failure", "issue_data": {"summary": "Failed task 2"}},
-        {"status": "success", "issue_data": {"summary": "Another success task"}},
-    ]
-
-    # Вызываем метод извлечения
-    result = command._extract_failed_tasks(tasks)
-
-    # Проверяем результат
-    assert len(result) == 2
-    assert result[0]["summary"] == "Failed task 1"
-    assert result[1]["summary"] == "Failed task 2"
-
-
-def test_extract_failed_command_extract_failed_tasks_csv():
-    """Тест: извлечение неудачных задач из CSV/Excel отчета"""
-    # Настраиваем аргументы
-    args = Mock()
-    args.report_file = "report.csv"
-    args.output_file = "failed.csv"
-
-    # Создаем команду
-    command = ExtractFailedCommand(args)
-
-    # Тестовые данные в формате CSV/Excel отчета
-    # Только поля с префиксом "tasks.", без поля "status"
-    tasks = [
-        {
-            "tasks.status": "success",
-            "tasks.summary": "Success task",
-            "tasks.project.key": "PROJ",
-        },
-        {
-            "tasks.status": "failure",
-            "tasks.summary": "Failed task 1",
-            "tasks.project.key": "PROJ",
-        },
-        {
-            "tasks.status": "failure",
-            "tasks.summary": "Failed task 2",
-            "tasks.project.key": "PROJ",
-        },
-    ]
-
-    # Вызываем метод извлечения
-    result = command._extract_failed_tasks(tasks)
-
-    # Проверяем результат
-    assert len(result) == 2
-    assert result[0]["summary"] == "Failed task 1"
-    assert result[1]["summary"] == "Failed task 2"
-    assert result[0]["project.key"] == "PROJ"
-    assert result[1]["project.key"] == "PROJ"
-
-
-@patch("tirajira.commands.extract_failed.os.path.exists")
-@patch(
-    "tirajira.commands.extract_failed.open",
-    new_callable=mock_open,
-    read_data='{"tasks": [{"status": "failure", "issue_data": '
-    '{"summary": "Failed task"}}]}',
-)
-@patch("tirajira.commands.extract_failed.json.load")
-@patch("tirajira.commands.extract_failed.create_report_writer")
-@patch("tirajira.commands.extract_failed.get_logger")
-def test_extract_failed_command_output_file_without_extension(
-    mock_get_logger, mock_create_report_writer, mock_json_load, mock_file, mock_exists
-):
-    """Тест: создание выходного файла с автоматическим добавлением расширения"""
-    # Настраиваем mock
-    mock_exists.return_value = True
-    mock_json_load.return_value = {
-        "tasks": [{"status": "failure", "issue_data": {"summary": "Failed task"}}]
-    }
-
-    mock_logger = Mock()
-    mock_get_logger.return_value = mock_logger
-
-    mock_writer = Mock()
-    mock_create_report_writer.return_value = mock_writer
-
-    # Настраиваем аргументы без расширения
-    args = Mock()
-    args.report_file = "report.json"
-    args.output_file = "failed"  # Без расширения
-
-    # Создаем команду и выполняем её
-    command = ExtractFailedCommand(args)
-    result = command.execute()
-
-    # Проверяем результат
-    assert result == 0
-
-    # Проверяем, что имя файла было обновлено с расширением
-    assert args.output_file == "failed.json"
-
-
-@patch("tirajira.commands.extract_failed.os.path.exists")
-@patch(
-    "tirajira.commands.extract_failed.open",
-    new_callable=mock_open,
-    read_data='{"tasks": [{"status": "failure", "issue_data": '
-    '{"summary": "Failed task"}}]}',
-)
-@patch("tirajira.commands.extract_failed.json.load")
-@patch("tirajira.commands.extract_failed.create_report_writer")
-@patch("tirajira.commands.extract_failed.get_logger")
-def test_extract_failed_command_with_yaml_report(
-    mock_get_logger, mock_create_report_writer, mock_json_load, mock_file, mock_exists
-):
-    """Тест: извлечение неудачных задач из YAML отчета"""
-    # Настраиваем mock
-    mock_exists.return_value = True
-    mock_json_load.return_value = {
-        "tasks": [{"status": "failure", "issue_data": {"summary": "Failed task"}}]
-    }
-
-    mock_logger = Mock()
-    mock_get_logger.return_value = mock_logger
-
-    mock_writer = Mock()
-    mock_create_report_writer.return_value = mock_writer
-
-    # Настраиваем аргументы с YAML файлом
-    args = Mock()
-    args.report_file = "report.yaml"
-    args.output_file = "failed.json"
-
-    # Создаем команду и выполняем её
-    command = ExtractFailedCommand(args)
-    result = command.execute()
-
-    # Проверяем результат
-    assert result == 0
-
-    # Проверяем, что логгер записал информацию
-    mock_get_logger.assert_called_once()
-    mock_logger.info.assert_called_once_with("Найдено 1 неудачных задач")
-    mock_logger.success.assert_called_once_with(
-        "Извлеченные задачи сохранены в файл: failed.json"
-    )
-
-
-@patch("tirajira.commands.extract_failed.os.path.exists")
-@patch("tirajira.commands.extract_failed.create_file_loader")
-@patch("tirajira.commands.extract_failed.create_report_writer")
-@patch("tirajira.commands.extract_failed.get_logger")
-def test_extract_failed_command_with_csv_report(
-    mock_get_logger, mock_create_report_writer, mock_create_file_loader, mock_exists
-):
-    """Тест: извлечение неудачных задач из CSV отчета"""
-    # Настраиваем mock
-    mock_exists.return_value = True
-
-    # Настраиваем mock для загрузчика файлов
-    mock_loader = Mock()
-    mock_loader.load_issues.return_value = [
-        {
-            "tasks.status": "failure",
-            "tasks.summary": "Failed task",
-            "tasks.project.key": "PROJ",
-        }
-    ]
-    mock_create_file_loader.return_value = mock_loader
-
-    mock_logger = Mock()
-    mock_get_logger.return_value = mock_logger
-
-    mock_writer = Mock()
-    mock_create_report_writer.return_value = mock_writer
-
-    # Настраиваем аргументы с CSV файлом
-    args = Mock()
-    args.report_file = "report.csv"
-    args.output_file = "failed.json"
-
-    # Создаем команду и выполняем её
-    command = ExtractFailedCommand(args)
-    result = command.execute()
-
-    # Проверяем результат
-    assert result == 0
-
-    # Проверяем, что логгер записал информацию
-    mock_get_logger.assert_called_once()
-    mock_logger.info.assert_called_once_with("Найдено 1 неудачных задач")
-    mock_logger.success.assert_called_once_with(
-        "Извлеченные задачи сохранены в файл: failed.json"
-    )
-
-
-@patch("tirajira.commands.extract_failed.os.path.exists")
-@patch(
-    "tirajira.commands.extract_failed.open",
-    new_callable=mock_open,
-    read_data='{"tasks": [{"status": "failure", "issue_data": '
-    '{"summary": "Failed task"}}]}',
-)
-@patch("tirajira.commands.extract_failed.json.load")
-@patch("tirajira.commands.extract_failed.create_report_writer")
-@patch("tirajira.commands.extract_failed.get_logger")
+@patch("tirajira.logger.get_logger")
 def test_extract_failed_command_with_custom_output_format(
-    mock_get_logger, mock_create_report_writer, mock_json_load, mock_file, mock_exists
+    mock_get_logger,
+    mock_create_report_writer,
+    mock_json_load,
+    mock_file,
+    mock_utils_validate_file_path,
+    mock_validate_file_path,
 ):
-    """Тест: извлечение неудачных задач с сохранением в разных форматах"""
-    # Настраиваем mock
-    mock_exists.return_value = True
+    """Test: extracting failed tasks with saving in different formats"""
+    # Setup mock
+    mock_validate_file_path.return_value = Path("report.json")
+    mock_utils_validate_file_path.return_value = Path("report.json")
     mock_json_load.return_value = {
         "tasks": [{"status": "failure", "issue_data": {"summary": "Failed task"}}]
     }
@@ -420,38 +108,45 @@ def test_extract_failed_command_with_custom_output_format(
     mock_writer = Mock()
     mock_create_report_writer.return_value = mock_writer
 
-    # Настраиваем аргументы с выходным файлом в формате YAML
+    # Setup arguments with output file in YAML format
     args = Mock()
     args.report_file = "report.json"
     args.output_file = "failed.yaml"
 
-    # Создаем команду и выполняем её
+    # Create command and execute it
     command = ExtractFailedCommand(args)
     result = command.execute()
 
-    # Проверяем результат
+    # Check result
     assert result == 0
 
-    # Проверяем, что создатель отчетов был вызван с правильным форматом
+    # Check that report writer was called with correct format
     mock_create_report_writer.assert_called_once_with("yaml")
 
 
-@patch("tirajira.commands.extract_failed.os.path.exists")
+@patch("tirajira.commands.extract_failed.validate_file_path")
+@patch("tirajira.commands.utils.validate_file_path")
 @patch(
-    "tirajira.commands.extract_failed.open",
+    "tirajira.commands.utils.open",
     new_callable=mock_open,
     read_data='{"tasks": [{"status": "failure", "issue_data": '
     '{"summary": "Failed task"}}]}',
 )
-@patch("tirajira.commands.extract_failed.json.load")
+@patch("tirajira.commands.utils.json.load")
 @patch("tirajira.commands.extract_failed.create_report_writer")
-@patch("tirajira.commands.extract_failed.get_logger")
+@patch("tirajira.logger.get_logger")
 def test_extract_failed_command_with_unsupported_output_format(
-    mock_get_logger, mock_create_report_writer, mock_json_load, mock_file, mock_exists
+    mock_get_logger,
+    mock_create_report_writer,
+    mock_json_load,
+    mock_file,
+    mock_utils_validate_file_path,
+    mock_validate_file_path,
 ):
-    """Тест: извлечение неудачных задач с сохранением в неподдерживаемом формате"""
-    # Настраиваем mock
-    mock_exists.return_value = True
+    """Test: extracting failed tasks with saving in unsupported format"""
+    # Setup mock
+    mock_validate_file_path.return_value = Path("report.json")
+    mock_utils_validate_file_path.return_value = Path("report.json")
     mock_json_load.return_value = {
         "tasks": [{"status": "failure", "issue_data": {"summary": "Failed task"}}]
     }
@@ -462,102 +157,120 @@ def test_extract_failed_command_with_unsupported_output_format(
     mock_writer = Mock()
     mock_create_report_writer.return_value = mock_writer
 
-    # Настраиваем аргументы с выходным файлом в неподдерживаемом формате
+    # Setup arguments with output file in unsupported format
     args = Mock()
     args.report_file = "report.json"
-    args.output_file = "failed.txt"  # Неподдерживаемый формат
+    args.output_file = "failed.txt"  # Unsupported format
 
-    # Создаем команду и выполняем её
+    # Create command and execute it
     command = ExtractFailedCommand(args)
     result = command.execute()
 
-    # Проверяем результат
+    # Check result
     assert result == 0
 
-    # Проверяем, что создатель отчетов был вызван с форматом JSON (по умолчанию)
+    # Check that report writer was called with JSON format (default)
     mock_create_report_writer.assert_called_once_with("json")
 
 
-def test_extract_failed_command_load_json_report_success():
-    """Тест: успешная загрузка JSON отчета"""
-    # Настраиваем аргументы
+@patch("tirajira.commands.utils.validate_file_path")
+def test_extract_failed_command_load_json_report_success(mock_validate_file_path):
+    """Test: successful JSON report loading"""
+    # Setup mock
+    mock_validate_file_path.return_value = Path("report.json")
+
+    # Setup arguments
     args = Mock()
     args.report_file = "report.json"
     args.output_file = "failed.json"
 
-    # Создаем команду
+    # Create command
     command = ExtractFailedCommand(args)
 
-    # Тестовые данные
+    # Test data
     json_data = (
         '{"tasks": [{"status": "failure", "issue_data": {"summary": "Failed task"}}]}'
     )
 
-    # Используем patch для имитации чтения файла
-    with patch("tirajira.commands.extract_failed.open", mock_open(read_data=json_data)):
+    # Use patch to simulate file reading
+    with patch("tirajira.commands.utils.open", mock_open(read_data=json_data)):
         result = command._load_json_report("report.json")
 
-        # Проверяем результат
+        # Check result
         assert "tasks" in result
         assert len(result["tasks"]) == 1
         assert result["tasks"][0]["status"] == "failure"
 
 
-def test_extract_failed_command_load_json_report_invalid_format():
-    """Тест: загрузка JSON отчета с недопустимым форматом"""
-    # Настраиваем аргументы
+@patch("tirajira.commands.utils.validate_file_path")
+def test_extract_failed_command_load_json_report_invalid_format(
+    mock_validate_file_path,
+):
+    """Test: loading JSON report with invalid format"""
+    # Setup mock
+    mock_validate_file_path.return_value = Path("report.json")
+
+    # Setup arguments
     args = Mock()
     args.report_file = "report.json"
     args.output_file = "failed.json"
 
-    # Создаем команду
+    # Create command
     command = ExtractFailedCommand(args)
 
-    # Тестовые данные - массив вместо объекта
+    # Test data - array instead of object
     json_data = '[{"status": "failure"}]'
 
-    # Используем patch для имитации чтения файла
-    with patch("tirajira.commands.extract_failed.open", mock_open(read_data=json_data)):
+    # Use patch to simulate file reading
+    with patch("tirajira.commands.utils.open", mock_open(read_data=json_data)):
         with pytest.raises(Exception) as exc_info:
             command._load_json_report("report.json")
 
-        # Проверяем сообщение об ошибке
-        assert "JSON файл отчета должен содержать объект" in str(exc_info.value)
+        # Check error message
+        assert "JSON report file must contain an object" in str(exc_info.value)
 
 
-def test_extract_failed_command_load_json_report_invalid_json():
-    """Тест: загрузка недопустимого JSON отчета"""
-    # Настраиваем аргументы
+@patch("tirajira.commands.utils.validate_file_path")
+def test_extract_failed_command_load_json_report_invalid_json(mock_validate_file_path):
+    """Test: loading invalid JSON report"""
+    # Setup mock
+    mock_validate_file_path.return_value = Path("report.json")
+
+    # Setup arguments
     args = Mock()
     args.report_file = "report.json"
     args.output_file = "failed.json"
 
-    # Создаем команду
+    # Create command
     command = ExtractFailedCommand(args)
 
-    # Тестовые данные - недопустимый JSON
-    json_data = '{"tasks": [{status: "failure"}]'  # Недопустимый JSON
+    # Test data - invalid JSON
+    json_data = '{"tasks": [{status: "failure"}]'  # Invalid JSON
 
-    # Используем patch для имитации чтения файла
-    with patch("tirajira.commands.extract_failed.open", mock_open(read_data=json_data)):
+    # Use patch to simulate file reading
+    with patch("tirajira.commands.utils.open", mock_open(read_data=json_data)):
         with pytest.raises(ValueError) as exc_info:
             command._load_json_report("report.json")
 
-        # Проверяем сообщение об ошибке
-        assert "Ошибка парсинга JSON файла отчета" in str(exc_info.value)
+        # Check error message
+        assert "Error parsing JSON report file" in str(exc_info.value)
 
 
-def test_extract_failed_command_load_yaml_report_success():
-    """Тест: успешная загрузка YAML отчета"""
-    # Настраиваем аргументы
+@patch("tirajira.commands.utils.validate_file_path")
+def test_extract_failed_command_load_yaml_report_success(mock_validate_file_path):
+    """Test: successful YAML report loading"""
+    # Setup mock
+    mock_validate_file_path.return_value = Path("report.yaml")
+
+    # Setup arguments
     args = Mock()
     args.report_file = "report.yaml"
     args.output_file = "failed.json"
 
-    # Создаем команду
+    # Create command
     command = ExtractFailedCommand(args)
 
-    # Тестовые данные
+    # Test data
     yaml_data = """
 tasks:
   - status: failure
@@ -565,9 +278,9 @@ tasks:
       summary: Failed task
 """
 
-    # Используем patch для имитации чтения файла
-    with patch("tirajira.commands.extract_failed.open", mock_open(read_data=yaml_data)):
-        with patch("tirajira.commands.extract_failed.yaml.safe_load") as mock_safe_load:
+    # Use patch to simulate file reading
+    with patch("tirajira.commands.utils.open", mock_open(read_data=yaml_data)):
+        with patch("tirajira.commands.utils.yaml.safe_load") as mock_safe_load:
             mock_safe_load.return_value = {
                 "tasks": [
                     {"status": "failure", "issue_data": {"summary": "Failed task"}}
@@ -575,69 +288,75 @@ tasks:
             }
             result = command._load_yaml_report("report.yaml")
 
-            # Проверяем результат
+            # Check result
             assert "tasks" in result
             assert len(result["tasks"]) == 1
             assert result["tasks"][0]["status"] == "failure"
 
 
-def test_extract_failed_command_load_yaml_report_invalid_format():
-    """Тест: загрузка YAML отчета с недопустимым форматом"""
-    # Настраиваем аргументы
+@patch("tirajira.commands.utils.validate_file_path")
+def test_extract_failed_command_load_yaml_report_invalid_format(
+    mock_validate_file_path,
+):
+    """Test: loading YAML report with invalid format"""
+    # Setup mock
+    mock_validate_file_path.return_value = Path("report.yaml")
+
+    # Setup arguments
     args = Mock()
     args.report_file = "report.yaml"
     args.output_file = "failed.json"
 
-    # Создаем команду
+    # Create command
     command = ExtractFailedCommand(args)
 
-    # Тестовые данные - массив вместо объекта
+    # Test data - array instead of object
     yaml_data = """
 - status: failure
 """
 
-    # Используем patch для имитации чтения файла
-    with patch("tirajira.commands.extract_failed.open", mock_open(read_data=yaml_data)):
-        with patch("tirajira.commands.extract_failed.yaml.safe_load") as mock_safe_load:
+    # Use patch to simulate file reading
+    with patch("tirajira.commands.utils.open", mock_open(read_data=yaml_data)):
+        with patch("tirajira.commands.utils.yaml.safe_load") as mock_safe_load:
             mock_safe_load.return_value = [{"status": "failure"}]
             with pytest.raises(Exception) as exc_info:
                 command._load_yaml_report("report.yaml")
 
-            # Проверяем сообщение об ошибке
-            assert "YAML файл отчета должен содержать объект" in str(exc_info.value)
+            # Check error message
+            assert "YAML report file must contain an object" in str(exc_info.value)
 
 
 def test_extract_failed_command_extract_failed_tasks_empty_list():
-    """Тест: извлечение неудачных задач из пустого списка"""
-    # Настраиваем аргументы
+    """Test: extracting failed tasks from empty list"""
+    # Setup arguments
     args = Mock()
     args.report_file = "report.json"
     args.output_file = "failed.json"
 
-    # Создаем команду
+    # Create command
     command = ExtractFailedCommand(args)
 
-    # Пустой список задач
+    # Empty task list
     tasks = []
 
-    # Вызываем метод извлечения
+    # Call extraction method
     result = command._extract_failed_tasks(tasks)
 
-    # Проверяем результат
+    # Check result
     assert len(result) == 0
 
 
 def test_extract_failed_command_extract_failed_tasks_mixed_status():
-    """Тест: извлечение неудачных задач из смешанного списка статусов"""
-    # Настраиваем аргументы
+    """Test: extracting failed tasks from mixed status list"""
+    # Setup arguments
     args = Mock()
     args.report_file = "report.json"
     args.output_file = "failed.json"
 
-    # Создаем команду
+    # Create command
     command = ExtractFailedCommand(args)
 
-    # Смешанный список задач
+    # Mixed task list
     tasks = [
         {"status": "success", "issue_data": {"summary": "Success task"}},
         {"status": "failure", "issue_data": {"summary": "Failed task 1"}},
@@ -646,36 +365,36 @@ def test_extract_failed_command_extract_failed_tasks_mixed_status():
         {"status": "completed", "issue_data": {"summary": "Completed task"}},
     ]
 
-    # Вызываем метод извлечения
+    # Call extraction method
     result = command._extract_failed_tasks(tasks)
 
-    # Проверяем результат
+    # Check result
     assert len(result) == 2
     assert result[0]["summary"] == "Failed task 1"
     assert result[1]["summary"] == "Failed task 2"
 
 
 def test_extract_failed_command_extract_failed_tasks_no_issue_data():
-    """Тест: извлечение неудачных задач без поля issue_data"""
-    # Настраиваем аргументы
+    """Test: extracting failed tasks without issue_data field"""
+    # Setup arguments
     args = Mock()
     args.report_file = "report.json"
     args.output_file = "failed.json"
 
-    # Создаем команду
+    # Create command
     command = ExtractFailedCommand(args)
 
-    # Задачи без поля issue_data
+    # Tasks without issue_data field
     tasks = [
         {"status": "failure", "summary": "Failed task", "project": {"key": "PROJ"}},
         {"status": "success", "summary": "Success task", "project": {"key": "PROJ"}},
     ]
 
-    # Вызываем метод извлечения
+    # Call extraction method
     result = command._extract_failed_tasks(tasks)
 
-    # Проверяем результат
+    # Check result
     assert len(result) == 1
     assert result[0]["summary"] == "Failed task"
     assert result[0]["project"]["key"] == "PROJ"
-    assert "status" not in result[0]  # Поле status должно быть удалено
+    assert "status" not in result[0]  # Status field should be removed

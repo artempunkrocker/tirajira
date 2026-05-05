@@ -3,8 +3,8 @@ name: Release
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - master
 
 jobs:
   release:
@@ -14,18 +14,30 @@ jobs:
       id-token: write
 
     steps:
-      # 1. Шаг: Получить код из репозитория
-      - uses: actions/checkout@v5
+      # 1. Step: Checkout code from repository
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: true
 
-      # 2. Шаг: Установить Python
+      # 2. Step: Cache dependencies
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.local/share/virtualenvs
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-poetry-
+
+      # 3. Step: Setup Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: '3.12'
 
-      # 3. Шаг: Установить Poetry
+      # 4. Step: Install Poetry
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
@@ -33,92 +45,38 @@ jobs:
           virtualenvs-create: true
           virtualenvs-in-project: true
 
-      # 4. Шаг: Установить зависимости
+      # 5. Step: Install dependencies
       - name: Install dependencies
         run: |
           poetry install
 
-      # 5. Шаг: Запустить тесты
+      # 6. Step: Run tests
       - name: Run tests
         run: |
           poetry run pytest
 
-      # 6. Шаг: Линтинг кода
+      # 7. Step: Code linting
       - name: Lint with Ruff
         run: |
           poetry run ruff check .
 
-      # 7. Шаг: Генерация changelog с использованием commitizen
-      - name: Generate changelog
-        id: changelog
-        run: |
-          # Установим зависимости, включая commitizen
-          poetry install
-          
-          # Установим commitizen глобально для доступа к командам cz
-          pip install commitizen
-          
-          # Сгенерируем changelog с помощью commitizen
-          echo "Generating changelog..."
-          cz changelog --file-name CHANGELOG.md
-          
-          # Выведем changelog в лог
-          echo "Generated changelog:"
-          cat CHANGELOG.md
-          
-          # Сохраним changelog для использования в release
-          echo "changelog<<EOF" >> $GITHUB_OUTPUT
-          cat CHANGELOG.md >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+      # 8. Step: Run Python Semantic Release
+      - name: Python Semantic Release
+        id: release
+        uses: python-semantic-release/python-semantic-release@v10.5.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      # 8. Шаг: Подготовка файлов для релиза (включая changelog)
-      - name: Prepare release files
+      # 9. Step: Build package
+      - name: Build package
+        if: steps.release.outputs.released == 'true'
         run: |
-          # Сборка пакета
           poetry build
-          
-          # Копируем CHANGELOG.md в директорию dist для включения в релиз
-          cp CHANGELOG.md dist/
 
-      # 9. Шаг: Загрузка артефактов
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+      # 10. Step: Publish to GitHub Release and PyPI
+      - name: Publish to GitHub Release and PyPI
+        if: steps.release.outputs.released == 'true'
+        uses: python-semantic-release/publish-action@v10.5.3
         with:
-          name: dist
-          path: dist/
-
-      # 10. Шаг: Создание GitHub Release
-      - name: Create GitHub Release
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: "dist/*"
-          body: |
-            ## Что нового
-            
-            ${{ steps.changelog.outputs.changelog }}
-            
-            ## Установка
-            
-            ```bash
-            pip install tirajira
-            ```
-            
-            ## Сборка пакета
-            
-            Этот релиз содержит следующие артефакты:
-            - Wheel дистрибутив (.whl)
-            - Исходный код (.tar.gz)
-            
-            ## Изменения в этом релизе
-            
-            Полный список изменений доступен в файле [CHANGELOG.md](./CHANGELOG.md) в репозитории.
-
-      # 11. Шаг: Публикация на PyPI
-      - name: Publish to PyPI
-        env:
-          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_API_TOKEN }}
-        run: |
-          poetry publish \
-            --build \
-            --username "__token__" \
-            --password "$POETRY_PYPI_TOKEN_PYPI"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          pypi_token: ${{ secrets.PYPI_API_TOKEN }}

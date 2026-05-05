@@ -1,0 +1,29 @@
+[
+  {
+    "project": {"key": "PROJ"},
+"summary": "Setting up CI/CD for Project Alpha",
+"description": "Set up continuous integration and delivery for Project Alpha",
+    "issuetype": {"name": "Task"},
+    "assignee": {"name": "developer"},
+    "priority": {"name": "High"},
+    "epic_key": "PROJ-100"
+  },
+  {
+    "project": {"key": "PROJ"},
+"summary": "API Documentation Update",
+"description": "Update REST API documentation according to recent changes",
+    "issuetype": {"name": "Task"},
+    "assignee": {"name": "techwriter"},
+    "priority": {"name": "Medium"},
+    "epic_key": "PROJ-101"
+  },
+  {
+    "project": {"key": "PROJ"},
+"summary": "Authorization Bug Fix",
+"description": "Fix user authorization issue in mobile application",
+    "issuetype": {"name": "Bug"},
+    "assignee": {"name": "qa"},
+    "priority": {"name": "Critical"},
+    "epic_key": "PROJ-102"
+  }
+]

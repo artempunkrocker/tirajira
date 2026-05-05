@@ -1,53 +1,53 @@
 """
-Модуль для отображения справочной информации по утилите TiraJira.
+Module for displaying help information for the TiraJira utility.
 """
 
 from .. import __version__
 
 
 def display_help() -> None:
-    """Отображает справочную информацию по утилите."""
+    """Displays help information for the utility."""
     help_text = f"""
-TiraJira (тиражира) - инструмент для автоматизации массового создания задач в Jira.
+TiraJira - tool for automating mass task creation in Jira.
 
-Описание:
-  Утилита позволяет создавать задачи в Jira из файлов JSON, YAML, CSV или Excel.
-  Поддерживает привязку задач к эпикам и логирование процесса создания задач.
+Description:
+  Utility allows creating tasks in Jira from JSON, YAML, CSV, or Excel files.
+  Supports linking tasks to epics and logging the task creation process.
 
-Форматы поддерживаемых файлов:
+Supported file formats:
   - JSON (.json)
   - YAML (.yaml, .yml)
   - CSV (.csv)
   - Excel (.xlsx)
 
-Использование:
-  python3 main.py <путь_к_файлу>
+Usage:
+  python3 main.py <path_to_file>
   python3 main.py --help
   python3 main.py --version
 
-Примеры:
-  # Создание задач из JSON файла
+Examples:
+  # Create tasks from JSON file
   python3 main.py tasks.json
 
-  # Создание задач из YAML файла
+  # Create tasks from YAML file
   python3 main.py tasks.yaml
 
-  # Создание задач из CSV файла
+  # Create tasks from CSV file
   python3 main.py tasks.csv
 
-  # Создание задач из Excel файла
+  # Create tasks from Excel file
   python3 main.py tasks.xlsx
 
-  # Отображение справки
+  # Display help
   python3 main.py --help
 
-  # Отображение версии
+  # Display version
   python3 main.py --version
 
-Версия: {__version__}
+Version: {__version__}
 
-Дополнительная информация:
-  Перед использованием необходимо настроить параметры подключения к Jira в файле .env
-  Скопируйте .env.example в .env и заполните своими данными.
+Additional information:
+  Before using, you need to configure Jira connection parameters in the .env file
+  Copy .env.example to .env and fill in your data.
 """
     print(help_text)

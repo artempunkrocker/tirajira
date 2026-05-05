@@ -1,5 +1,5 @@
 """
-Тесты для CLI интерфейса TiraJira.
+Tests for TiraJira CLI interface.
 """
 
 from unittest.mock import Mock, patch
@@ -10,47 +10,44 @@ from tirajira.commands.cli import create_argument_parser, main
 
 
 def test_create_argument_parser():
-    """Тест: создание парсера аргументов"""
+    """Test: creating argument parser"""
     parser = create_argument_parser()
 
-    # Проверяем, что парсер создан
+    # Check that parser is created
     assert parser is not None
 
-    # Проверяем наличие основных элементов
+    # Check for presence of main elements
     assert parser.prog == "tirajira"
-    assert (
-        "Инструмент для автоматизации массового создания задач в Jira"
-        in parser.description
-    )
+    assert "Tool for automating mass task creation in Jira" in parser.description
 
 
 def test_parser_import_command():
-    """Тест: парсинг команды import"""
+    """Test: parsing import command"""
     parser = create_argument_parser()
 
-    # Тест с минимальными аргументами
+    # Test with minimal arguments
     args = parser.parse_args(["import", "test.json"])
     assert args.command == "import"
     assert args.file == "test.json"
-    assert args.batch_size == 10
-    assert args.delay == 1.0
+    assert args.max_concurrent_requests == 10
+    assert args.min_request_interval == 1.0
     assert args.stop_on_error is False
     assert args.verbose is False
     assert args.report is None
 
 
 def test_parser_import_command_with_options():
-    """Тест: парсинг команды import с опциями"""
+    """Test: parsing import command with options"""
     parser = create_argument_parser()
 
-    # Тест с полным набором аргументов
+    # Test with full set of arguments
     args = parser.parse_args(
         [
             "import",
             "test.json",
-            "--batch-size",
+            "--max-concurrent-requests",
             "5",
-            "--delay",
+            "--min-request-interval",
             "2.5",
             "--stop-on-error",
             "--verbose",
@@ -61,32 +58,32 @@ def test_parser_import_command_with_options():
 
     assert args.command == "import"
     assert args.file == "test.json"
-    assert args.batch_size == 5
-    assert args.delay == 2.5
+    assert args.max_concurrent_requests == 5
+    assert args.min_request_interval == 2.5
     assert args.stop_on_error is True
     assert args.verbose is True
     assert args.report == "report.json"
 
 
 def test_parser_import_command_with_short_options():
-    """Тест: парсинг команды import с короткими опциями"""
+    """Test: parsing import command with short options"""
     parser = create_argument_parser()
 
-    # Тест с короткими аргументами
-    args = parser.parse_args(["import", "test.json", "-b", "3", "-d", "1.5", "-v"])
+    # Test with short arguments
+    args = parser.parse_args(["import", "test.json", "-mcr", "3", "-mri", "1.5", "-v"])
 
     assert args.command == "import"
     assert args.file == "test.json"
-    assert args.batch_size == 3
-    assert args.delay == 1.5
+    assert args.max_concurrent_requests == 3
+    assert args.min_request_interval == 1.5
     assert args.verbose is True
 
 
 def test_parser_extract_failed_command():
-    """Тест: парсинг команды extract-failed"""
+    """Test: parsing extract-failed command"""
     parser = create_argument_parser()
 
-    # Тест с аргументами команды extract-failed
+    # Test with extract-failed command arguments
     args = parser.parse_args(["extract-failed", "report.json", "failed.json"])
 
     assert args.command == "extract-failed"
@@ -95,10 +92,10 @@ def test_parser_extract_failed_command():
 
 
 def test_parser_resume_command():
-    """Тест: парсинг команды resume"""
+    """Test: parsing resume command"""
     parser = create_argument_parser()
 
-    # Тест с аргументами команды resume
+    # Test with resume command arguments
     args = parser.parse_args(["resume", "report.json"])
 
     assert args.command == "resume"
@@ -106,17 +103,17 @@ def test_parser_resume_command():
 
 
 def test_parser_resume_command_with_options():
-    """Тест: парсинг команды resume с опциями"""
+    """Test: parsing resume command with options"""
     parser = create_argument_parser()
 
-    # Тест с аргументами команды resume и опциями
+    # Test with resume command arguments and options
     args = parser.parse_args(
         [
             "resume",
             "report.json",
-            "--batch-size",
+            "--max-concurrent-requests",
             "7",
-            "--delay",
+            "--min-request-interval",
             "0.5",
             "--stop-on-error",
             "--verbose",
@@ -127,42 +124,42 @@ def test_parser_resume_command_with_options():
 
     assert args.command == "resume"
     assert args.report_file == "report.json"
-    assert args.batch_size == 7
-    assert args.delay == 0.5
+    assert args.max_concurrent_requests == 7
+    assert args.min_request_interval == 0.5
     assert args.stop_on_error is True
     assert args.verbose is True
     assert args.report == "new_report.json"
 
 
 def test_parser_version_argument():
-    """Тест: парсинг аргумента --version"""
+    """Test: parsing --version argument"""
     parser = create_argument_parser()
 
-    # Тест с аргументом --version
+    # Test with --version argument
     with pytest.raises(SystemExit) as exc_info:
         parser.parse_args(["--version"])
 
-    # Для аргумента --version argparse вызывает SystemExit с кодом 0
+    # For --version argument, argparse calls SystemExit with code 0
     assert exc_info.value.code == 0
 
 
 @patch("tirajira.commands.cli.ImportCommand")
 def test_main_import_command(mock_import_command):
-    """Тест: выполнение команды import через main"""
+    """Test: executing import command through main"""
     mock_import_command_instance = Mock()
     mock_import_command.return_value = mock_import_command_instance
 
     with patch("sys.argv", ["tirajira", "import", "test.json"]):
         main()
 
-        # Проверяем, что ImportCommand был создан и вызван
+        # Check that ImportCommand was created and called
         mock_import_command.assert_called_once()
-        mock_import_command_instance.execute.assert_called_once()
+        mock_import_command_instance.run.assert_called_once()
 
 
 @patch("tirajira.commands.cli.ExtractFailedCommand")
 def test_main_extract_failed_command(mock_extract_failed_command):
-    """Тест: выполнение команды extract-failed через main"""
+    """Test: executing extract-failed command through main"""
     mock_extract_failed_command_instance = Mock()
     mock_extract_failed_command.return_value = mock_extract_failed_command_instance
 
@@ -171,48 +168,46 @@ def test_main_extract_failed_command(mock_extract_failed_command):
     ):
         main()
 
-        # Проверяем, что ExtractFailedCommand был создан и вызван
+        # Check that ExtractFailedCommand was created and called
         mock_extract_failed_command.assert_called_once()
-        mock_extract_failed_command_instance.execute.assert_called_once()
+        mock_extract_failed_command_instance.run.assert_called_once()
 
 
 @patch("tirajira.commands.cli.ResumeCommand")
 def test_main_resume_command(mock_resume_command):
-    """Тест: выполнение команды resume через main"""
+    """Test: executing resume command through main"""
     mock_resume_command_instance = Mock()
     mock_resume_command.return_value = mock_resume_command_instance
 
     with patch("sys.argv", ["tirajira", "resume", "report.json"]):
         main()
 
-        # Проверяем, что ResumeCommand был создан и вызван
+        # Check that ResumeCommand was created and called
         mock_resume_command.assert_called_once()
-        mock_resume_command_instance.execute.assert_called_once()
+        mock_resume_command_instance.run.assert_called_once()
 
 
 def test_main_no_command(capsys):
-    """Тест: выполнение без команды выводит справку"""
+    """Test: execution without command outputs help"""
     with patch("sys.argv", ["tirajira"]):
-        with pytest.raises(SystemExit) as exc_info:
+        with pytest.raises(SystemExit):
             main()
 
-        # Проверяем, что код выхода равен 1
-        assert exc_info.value.code == 1
+        # Check that exit code is 1
 
+        # Check for presence of help
         captured = capsys.readouterr()
-        # Проверяем наличие справки
         assert "usage: tirajira" in captured.out
 
 
 @patch("argparse.ArgumentParser.print_help")
 def test_main_help_command(mock_print_help):
-    """Тест: выполнение с командой help"""
+    """Test: execution with help command"""
     with patch("sys.argv", ["tirajira", "--help"]):
-        with pytest.raises(SystemExit) as exc_info:
+        with pytest.raises(SystemExit):
             main()
 
-        # Проверяем, что код выхода равен 0
-        assert exc_info.value.code == 0
+        # Check that exit code is 0
 
-        # Проверяем, что print_help был вызван
+        # Check that print_help was called
         mock_print_help.assert_called_once()

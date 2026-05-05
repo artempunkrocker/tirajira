@@ -1,5 +1,5 @@
 """
-Фабрика для создания стратегий аутентификации.
+Factory for creating authentication strategies.
 """
 
 import os
@@ -8,33 +8,33 @@ from .auth_strategy import AuthStrategy, BasicAuthStrategy, PatAuthStrategy
 
 
 class AuthFactory:
-    """Фабрика для создания стратегий аутентификации."""
+    """Factory for creating authentication strategies."""
 
     @staticmethod
     def create_auth_strategy() -> AuthStrategy:
         """
-        Создает стратегию аутентификации на основе переменных окружения.
+        Creates authentication strategy based on environment variables.
 
         Returns:
-            AuthStrategy: Стратегия аутентификации
+            AuthStrategy: Authentication strategy
 
         Raises:
-            ValueError: Если не удалось создать стратегию из-за отсутствия
-                        необходимых переменных окружения
+            ValueError: If strategy creation failed due to missing
+                        required environment variables
         """
-        # Проверяем, какой режим аутентификации использовать
+        # Check which authentication mode to use
         pat_token = os.getenv("JIRA_PAT_TOKEN")
 
         if pat_token:
-            # Используем токен-аутентификацию (Personal Access Token)
+            # Use token authentication (Personal Access Token)
             return AuthFactory._create_pat_strategy(pat_token)
         else:
-            # Используем базовую аутентификацию (обратная совместимость)
+            # Use basic authentication (backward compatibility)
             return AuthFactory._create_basic_auth_strategy()
 
     @staticmethod
     def _create_pat_strategy(pat_token: str) -> PatAuthStrategy:
-        """Создает стратегию PAT аутентификации."""
+        """Creates PAT authentication strategy."""
         jira_server = os.getenv("JIRA_SERVER")
         if not jira_server:
             raise ValueError("JIRA_SERVER is required for PAT authentication")
@@ -43,7 +43,7 @@ class AuthFactory:
 
     @staticmethod
     def _create_basic_auth_strategy() -> BasicAuthStrategy:
-        """Создает стратегию базовой аутентификации."""
+        """Creates basic authentication strategy."""
         jira_server = os.getenv("JIRA_SERVER")
         jira_email = os.getenv("JIRA_EMAIL")
         jira_api_token = os.getenv("JIRA_API_TOKEN")

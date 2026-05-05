@@ -1,7 +1,7 @@
 - project:
     key: PROJ
-  summary: Настройка CI/CD для проекта Альфа
-  description: Настроить непрерывную интеграцию и доставку для проекта Альфа
+summary: Setting up CI/CD for Project Alpha
+description: Set up continuous integration and delivery for Project Alpha
   issuetype:
     name: Task
   assignee:
@@ -11,8 +11,8 @@
   epic_key: PROJ-100
 - project:
     key: PROJ
-  summary: Обновление документации API
-  description: Обновить документацию REST API в соответствии с последними изменениями
+summary: API Documentation Update
+description: Update REST API documentation according to recent changes
   issuetype:
     name: Task
   assignee:
@@ -22,8 +22,8 @@
   epic_key: PROJ-101
 - project:
     key: PROJ
-  summary: Исправление бага с авторизацией
-  description: Исправить проблему с авторизацией пользователей в мобильном приложении
+summary: Authorization Bug Fix
+description: Fix user authorization issue in mobile application
   issuetype:
     name: Bug
   assignee:

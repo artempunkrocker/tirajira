@@ -1,35 +1,33 @@
 """
-Загрузчик задач из JSON файлов.
+Loader for issues from JSON files.
 """
 
 import json
-import os
 from typing import Any, Dict, List
 
-from .base import FileLoader
+from .base_loader import BaseFileLoader
+from .exception_handler import handle_loader_exceptions
 
 
-class JsonFileLoader(FileLoader):
-    """Загрузчик задач из JSON файлов."""
+class JsonFileLoader(BaseFileLoader):
+    """Loader for issues from JSON files."""
 
+    @handle_loader_exceptions(format_name="JSON file")
     def load_issues(self, file_path: str) -> List[Dict[Any, Any]]:
-        """Загружает задачи из JSON файла."""
-        if not os.path.exists(file_path):
-            raise FileNotFoundError(f"Файл {file_path} не найден.")
+        """Loads issues from JSON file."""
+        with self._validate_and_open_file(file_path, "r", encoding="utf-8") as f:
+            issues = json.load(f)
 
-        try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                issues = json.load(f)
+        # Check that data has the correct format
+        if not isinstance(issues, list):
+            raise ValueError("JSON file must contain an array of issues")
 
-            # Проверяем, что данные имеют правильный формат
-            if not isinstance(issues, list):
-                raise ValueError("JSON файл должен содержать массив задач")
+        # Process linking information for each issue
+        for issue in issues:
+            if isinstance(issue, dict) and "linking" in issue:
+                linking_info = issue.pop("linking")
+                if isinstance(linking_info, (dict, list)):
+                    # Add linking information directly to the issue
+                    issue["linking"] = linking_info
 
-            return issues
-        except json.JSONDecodeError as e:
-            raise ValueError(f"Ошибка парсинга JSON файла: {str(e)}") from e
-        except ValueError:
-            # Перебрасываем ValueError без оборачивания
-            raise
-        except Exception as e:
-            raise Exception(f"Ошибка при чтении файла: {str(e)}") from e
+        return issues

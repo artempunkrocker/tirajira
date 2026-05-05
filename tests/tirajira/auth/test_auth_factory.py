@@ -7,7 +7,7 @@ from tirajira.auth.auth_strategy import BasicAuthStrategy, PatAuthStrategy
 
 
 def test_auth_factory_create_pat_strategy():
-    """Тест: фабрика создает PAT стратегию когда есть JIRA_PAT_TOKEN"""
+    """Test: factory creates PAT strategy when JIRA_PAT_TOKEN is present"""
     with patch.dict(
         "os.environ",
         {
@@ -22,7 +22,7 @@ def test_auth_factory_create_pat_strategy():
 
 
 def test_auth_factory_create_basic_auth_strategy():
-    """Тест: фабрика создает базовую стратегию когда нет JIRA_PAT_TOKEN"""
+    """Test: factory creates basic strategy when JIRA_PAT_TOKEN is absent"""
     with patch.dict(
         "os.environ",
         {
@@ -40,7 +40,7 @@ def test_auth_factory_create_basic_auth_strategy():
 
 
 def test_auth_factory_pat_missing_server():
-    """Тест: фабрика выбрасывает исключение при отсутствии JIRA_SERVER для PAT"""
+    """Test: factory raises exception when JIRA_SERVER is missing for PAT"""
     with patch.dict(
         "os.environ",
         {
@@ -55,8 +55,8 @@ def test_auth_factory_pat_missing_server():
 
 
 def test_auth_factory_basic_auth_missing_server():
-    """Тест: фабрика выбрасывает исключение при отсутствии JIRA_SERVER
-    для базовой аутентификации"""
+    """Test: factory raises exception when JIRA_SERVER is missing
+    for basic authentication"""
     with patch.dict(
         "os.environ",
         {
@@ -72,8 +72,8 @@ def test_auth_factory_basic_auth_missing_server():
 
 
 def test_auth_factory_basic_auth_missing_email():
-    """Тест: фабрика выбрасывает исключение при отсутствии JIRA_EMAIL
-    для базовой аутентификации"""
+    """Test: factory raises exception when JIRA_EMAIL is missing
+    for basic authentication"""
     with patch.dict(
         "os.environ",
         {
@@ -89,8 +89,8 @@ def test_auth_factory_basic_auth_missing_email():
 
 
 def test_auth_factory_basic_auth_missing_api_token():
-    """Тест: фабрика выбрасывает исключение при отсутствии JIRA_API_TOKEN
-    для базовой аутентификации"""
+    """Test: factory raises exception when JIRA_API_TOKEN is missing
+    for basic authentication"""
     with patch.dict(
         "os.environ",
         {

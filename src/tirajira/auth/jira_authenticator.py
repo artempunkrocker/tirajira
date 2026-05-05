@@ -1,5 +1,5 @@
 """
-Модуль для аутентификации в Jira API.
+Module for authentication in Jira API.
 """
 
 import logging
@@ -14,34 +14,34 @@ logger = logging.getLogger(__name__)
 
 
 class JiraAuthenticator:
-    """Аутентификатор для Jira API."""
+    """Authenticator for Jira API."""
 
     def __init__(self, auth_strategy: Optional[AuthStrategy] = None):
         """
-        Инициализирует аутентификатор.
+        Initializes the authenticator.
 
         Args:
-            auth_strategy: Стратегия аутентификации. Если не указана, будет
-                           создана через фабрику.
+            auth_strategy: Authentication strategy. If not specified, will be
+                           created through factory.
         """
         self.auth_strategy = auth_strategy or AuthFactory.create_auth_strategy()
 
     def authenticate(self) -> JIRA:
         """
-        Аутентифицирует и возвращает клиент JIRA.
+        Authenticates and returns JIRA client.
 
         Returns:
-            JIRA: Аутентифицированный клиент JIRA
+            JIRA: Authenticated JIRA client
 
         Raises:
-            Exception: Если аутентификация не удалась
+            Exception: If authentication failed
         """
         try:
             auth_params = self.auth_strategy.get_auth_params()
-            logger.info(f"Аутентификация в Jira: {auth_params}")
+            logger.info(f"Authentication in Jira: {auth_params}")
             jira_client = self.auth_strategy.authenticate()
-            logger.info("Успешная аутентификация в Jira")
+            logger.info("Successful authentication in Jira")
             return jira_client
         except Exception as e:
-            logger.error(f"Ошибка аутентификации в Jira: {e}")
+            logger.error(f"Error authentication in Jira: {e}")
             raise

@@ -1,5 +1,5 @@
 """
-Пакет для загрузки задач из файлов различных форматов.
+Package for loading issues from files of various formats.
 """
 
 from .csv_loader import CsvFileLoader

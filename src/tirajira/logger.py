@@ -1,25 +1,17 @@
 """
-Модуль для централизованного логирования с поддержкой разных уровней детализации.
+Module for centralized logging with support for different levels of detail.
 """
 
 import logging
 import sys
-from enum import Enum
 from typing import Optional
 
 
-class LogLevel(Enum):
-    """Уровни логирования."""
-
-    NORMAL = "normal"
-    VERBOSE = "verbose"
-
-
 class Logger:
-    """Централизованный логгер с поддержкой разных режимов вывода."""
+    """Centralized logger with support for different output modes."""
 
     _instance: Optional["Logger"] = None
-    _initialized: bool = False
+    _disable_console_output = False
 
     def __new__(cls) -> "Logger":
         if cls._instance is None:
@@ -27,20 +19,35 @@ class Logger:
         return cls._instance
 
     def __init__(self) -> None:
-        if not self._initialized:
+        if not hasattr(self, "logger"):
             self.logger = logging.getLogger("tirajira")
             self.logger.setLevel(logging.DEBUG)
 
-            # Создаем обработчик для вывода в консоль
-            handler = logging.StreamHandler(sys.stdout)
-            handler.setFormatter(logging.Formatter("%(message)s"))
-            self.logger.addHandler(handler)
+            if not Logger._disable_console_output:
+                handler = logging.StreamHandler(sys.stdout)
+                handler.setFormatter(logging.Formatter("%(message)s"))
+                self.logger.addHandler(handler)
 
             self.verbose_mode = False
-            self._initialized = True
+
+    @classmethod
+    def disable_console_output(cls) -> None:
+        cls._disable_console_output = True
+
+        if cls._instance and hasattr(cls._instance, "logger"):
+            cls._instance.logger.handlers.clear()
+
+    @classmethod
+    def enable_console_output(cls) -> None:
+        cls._disable_console_output = False
+
+        if cls._instance and hasattr(cls._instance, "logger"):
+            cls._instance.logger.handlers.clear()
+            handler = logging.StreamHandler(sys.stdout)
+            handler.setFormatter(logging.Formatter("%(message)s"))
+            cls._instance.logger.addHandler(handler)
 
     def set_verbose(self, verbose: bool) -> None:
-        """Установка режима подробного логирования."""
         self.verbose_mode = verbose
 
         if verbose:
@@ -48,28 +55,25 @@ class Logger:
         else:
             self.logger.setLevel(logging.INFO)
 
+    def _add_emoji_prefix(self, message: str, emoji: str) -> str:
+        return f"{emoji} {message}"
+
     def info(self, message: str) -> None:
-        """Вывод информационного сообщения."""
         self.logger.info(message)
 
     def error(self, message: str) -> None:
-        """Вывод сообщения об ошибке."""
-        self.logger.error(f"❌ Ошибка: {message}")
+        self.logger.error(self._add_emoji_prefix(f"Error: {message}", "❌"))
 
     def debug(self, message: str) -> None:
-        """Вывод отладочного сообщения (только в verbose режиме)."""
         if self.verbose_mode:
-            self.logger.debug(f"🔍 Debug: {message}")
+            self.logger.debug(self._add_emoji_prefix(f"Debug: {message}", "🔍"))
 
     def progress(self, message: str) -> None:
-        """Вывод сообщения о прогрессе."""
-        self.logger.info(f"⏳ {message}")
+        self.logger.info(self._add_emoji_prefix(message, "⏳"))
 
     def success(self, message: str) -> None:
-        """Вывод сообщения об успехе."""
-        self.logger.info(f"✅ {message}")
+        self.logger.info(self._add_emoji_prefix(message, "✅"))
 
 
 def get_logger() -> Logger:
-    """Получение экземпляра логгера (Singleton)."""
     return Logger()

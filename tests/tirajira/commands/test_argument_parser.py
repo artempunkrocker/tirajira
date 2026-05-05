@@ -1,5 +1,5 @@
 """
-Тесты для парсера аргументов TiraJira.
+Tests for TiraJira argument parser.
 """
 
 import io
@@ -9,25 +9,25 @@ from tirajira.commands.argument_parser import ArgumentParser
 
 
 def test_argument_parser_init():
-    """Тест: инициализация парсера аргументов"""
+    """Test: argument parser initialization"""
     parser = ArgumentParser()
 
-    # Проверяем, что парсер создан
+    # Check that parser is created
     assert parser is not None
     assert parser.parser is not None
 
 
 def test_argument_parser_parse_with_file():
-    """Тест: парсинг аргументов с указанием файла"""
+    """Test: parsing arguments with file specified"""
     parser = ArgumentParser()
 
-    # Имитируем аргументы командной строки
+    # Mock command line arguments
     with patch("sys.argv", ["main.py", "test.json"]):
         args = parser.parse()
 
         assert args.file_path == "test.json"
-        assert args.batch_size == 10  # значение по умолчанию
-        assert args.delay == 1.0  # значение по умолчанию
+        assert args.max_concurrent_requests == 10  # default value
+        assert args.min_request_interval == 1.0  # default value
         assert args.stop_on_error is False
         assert args.verbose is False
         assert args.report is None
@@ -36,18 +36,18 @@ def test_argument_parser_parse_with_file():
 
 
 def test_argument_parser_parse_with_options():
-    """Тест: парсинг аргументов с опциями"""
+    """Test: parsing arguments with options"""
     parser = ArgumentParser()
 
-    # Имитируем аргументы командной строки с опциями
+    # Mock command line arguments with options
     with patch(
         "sys.argv",
         [
             "main.py",
             "test.json",
-            "--batch-size",
+            "--max-concurrent-requests",
             "5",
-            "--delay",
+            "--min-request-interval",
             "2.5",
             "--stop-on-error",
             "--verbose",
@@ -58,43 +58,45 @@ def test_argument_parser_parse_with_options():
         args = parser.parse()
 
         assert args.file_path == "test.json"
-        assert args.batch_size == 5
-        assert args.delay == 2.5
+        assert args.max_concurrent_requests == 5
+        assert args.min_request_interval == 2.5
         assert args.stop_on_error is True
         assert args.verbose is True
         assert args.report == "report.json"
 
 
 def test_argument_parser_parse_with_short_options():
-    """Тест: парсинг аргументов с короткими опциями"""
+    """Test: parsing arguments with short options"""
     parser = ArgumentParser()
 
-    # Создаем аргументы напрямую, чтобы избежать конфликта с pytest
-    args = parser.parser.parse_args(["test.json", "-b", "3", "-d", "1.5", "--verbose"])
+    # Create arguments directly to avoid conflict with pytest
+    args = parser.parser.parse_args(
+        ["test.json", "-mcr", "3", "-mri", "1.5", "--verbose"]
+    )
 
     assert args.file_path == "test.json"
-    assert args.batch_size == 3
-    assert args.delay == 1.5
+    assert args.max_concurrent_requests == 3
+    assert args.min_request_interval == 1.5
     assert args.verbose is True
 
 
 def test_argument_parser_parse_report_without_value():
-    """Тест: парсинг аргумента --report без значения"""
+    """Test: parsing --report argument without value"""
     parser = ArgumentParser()
 
-    # Имитируем аргументы командной строки с --report без значения
+    # Mock command line arguments with --report without value
     with patch("sys.argv", ["main.py", "test.json", "--report"]):
         args = parser.parse()
 
         assert args.file_path == "test.json"
-        assert args.report is True  # Когда --report указан без значения
+        assert args.report is True  # When --report is specified without value
 
 
 def test_argument_parser_parse_help():
-    """Тест: парсинг аргумента --help"""
+    """Test: parsing --help argument"""
     parser = ArgumentParser()
 
-    # Имитируем аргументы командной строки с --help
+    # Mock command line arguments with --help
     with patch("sys.argv", ["main.py", "--help"]):
         args = parser.parse()
 
@@ -102,10 +104,10 @@ def test_argument_parser_parse_help():
 
 
 def test_argument_parser_parse_version():
-    """Тест: парсинг аргумента --version"""
+    """Test: parsing --version argument"""
     parser = ArgumentParser()
 
-    # Имитируем аргументы командной строки с --version
+    # Mock command line arguments with --version
     with patch("sys.argv", ["main.py", "--version"]):
         args = parser.parse()
 
@@ -113,78 +115,79 @@ def test_argument_parser_parse_version():
 
 
 def test_argument_parser_handle_special_args_help():
-    """Тест: обработка специального аргумента --help"""
+    """Test: handling special --help argument"""
     parser = ArgumentParser()
 
-    # Создаем аргументы с --help
+    # Create arguments with --help
     args = parser.parser.parse_args(["--help"])
 
-    # Проверяем, что handle_special_args возвращает True для --help
+    # Check that handle_special_args returns True for --help
     with patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
         result = parser.handle_special_args(args)
 
         assert result is True
         output = mock_stdout.getvalue()
-        # Проверяем, что вывод содержит справку
-        assert "TiraJira (тиражира)" in output
+        # Check that output contains help
+        assert "TiraJira - tool for automating mass task creation in Jira" in output
 
 
 def test_argument_parser_handle_special_args_version():
-    """Тест: обработка специального аргумента --version"""
+    """Test: handling special --version argument"""
     parser = ArgumentParser()
 
-    # Создаем аргументы с --version
+    # Create arguments with --version
     args = parser.parser.parse_args(["--version"])
 
-    # Проверяем, что handle_special_args возвращает True для --version
+    # Check that handle_special_args returns True for --version
     with patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
-        with patch("tirajira.__version__", "1.0.0"):
-            result = parser.handle_special_args(args)
+        from tirajira import __version__
 
-            assert result is True
-            output = mock_stdout.getvalue()
-            # Проверяем, что вывод содержит версию
-            assert "TiraJira version 1.0.0" in output
+        result = parser.handle_special_args(args)
+
+        assert result is True
+        output = mock_stdout.getvalue()
+        # Check that output contains version
+        assert f"TiraJira version {__version__}" in output
 
 
 def test_argument_parser_handle_special_args_no_special():
-    """Тест: обработка обычных аргументов (не специальных)"""
+    """Test: handling regular arguments (not special)"""
     parser = ArgumentParser()
 
-    # Создаем обычные аргументы
+    # Create regular arguments
     args = parser.parser.parse_args(["test.json"])
 
-    # Проверяем, что handle_special_args возвращает False для обычных аргументов
+    # Check that handle_special_args returns False for regular arguments
     result = parser.handle_special_args(args)
 
     assert result is False
 
 
 def test_argument_parser_validate_args_valid():
-    """Тест: валидация корректных аргументов"""
+    """Test: validation of valid arguments"""
     parser = ArgumentParser()
 
-    # Создаем аргументы с указанием файла
+    # Create arguments with file specification
     args = parser.parser.parse_args(["test.json"])
 
-    # Проверяем, что валидация проходит успешно
+    # Check that validation passes successfully
     result = parser.validate_args(args)
 
     assert result is True
 
 
 def test_argument_parser_validate_args_invalid_no_file():
-    """Тест: валидация некорректных аргументов (без файла)"""
+    """Test: validation of invalid arguments (no file)"""
     parser = ArgumentParser()
 
-    # Создаем аргументы без указания файла
+    # Create arguments without file specification
     args = parser.parser.parse_args([])
 
-    # Проверяем, что валидация не проходит
+    # Check that validation fails
     with patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
         result = parser.validate_args(args)
 
         assert result is False
         output = mock_stdout.getvalue()
-        # Проверяем, что вывод содержит сообщение об ошибке
-        assert "Ошибка: Не указан путь к файлу с задачами" in output
+        # Check that output contains error message
+        assert "Error: No path to task file specified" in output

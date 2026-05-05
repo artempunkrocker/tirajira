@@ -1,5 +1,5 @@
 """
-Модуль команд TiraJira.
+TiraJira commands module.
 """
 
 from .base import BaseCommand
