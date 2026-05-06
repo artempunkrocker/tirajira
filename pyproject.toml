@@ -94,7 +94,7 @@ directory = "htmlcov"
 [tool.semantic_release]
 version_toml = ["pyproject.toml:project.version"]
 version_variables = ["src/tirajira/__init__.py:__version__"]
-build_command = "poetry build"
+build_command = ""
 changelog_file = "CHANGELOG.md"
 tag_format = "v{version}"
 upload_to_vcs_release = true
