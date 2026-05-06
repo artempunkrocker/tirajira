@@ -24,7 +24,7 @@ Before seeking help, please review the available documentation:
 
 If you're having trouble installing TiraJira:
 
-1. Make sure you have Python 3.8 or higher installed:
+1. Make sure you have Python 3.10 or higher installed:
    ```bash
    python3 --version
    ```

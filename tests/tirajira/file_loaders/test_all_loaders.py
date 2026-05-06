@@ -559,7 +559,7 @@ class TestAllFileLoaders:
                         with pytest.raises(
                             Exception,
                             match=(
-                                "Error reading file: CSV file is empty or " "corrupted"
+                                "Error reading file: CSV file is empty or corrupted"
                             ),
                         ):
                             loader.load_issues("empty.csv")

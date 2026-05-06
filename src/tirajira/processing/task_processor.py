@@ -127,7 +127,7 @@ class TaskProcessor:
                 or not link.link_type
             ):
                 self.logger.warning(
-                    f"Incorrect link #{i+1} for issue {issue_key}: "
+                    f"Incorrect link #{i + 1} for issue {issue_key}: "
                     f"required data is missing"
                 )
                 task_detail["links"]["failed"].append(

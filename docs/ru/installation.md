@@ -2,7 +2,7 @@
 
 ## Системные требования
 
-- Python 3.8 или выше
+- Python 3.10 или выше
 - Доступ к Jira Server
 - API-токен для доступа к Jira
 
@@ -37,7 +37,7 @@ poetry shell
 tirajira --version
 ```
 
-Для работы потребуется Python 3.8+ и Poetry. Установите Poetry согласно [официальной документации](https://python-poetry.org/docs/#installation).
+Для работы потребуется Python 3.10+ и Poetry. Установите Poetry согласно [официальной документации](https://python-poetry.org/docs/#installation).
 
 ## Сборка из исходного кода
 

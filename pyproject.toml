@@ -10,7 +10,7 @@ authors = [{name = "Artem Vasilev", email = "artempunkrocker@gmail.com"}]
 license = "Apache-2.0"
 readme = "README.md"
 keywords = ["jira", "automation", "task-creation", "json", "yaml", "csv", "excel", "xml"]
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 dynamic = ["classifiers", "dependencies"]
 
 [project.urls]
@@ -27,18 +27,18 @@ authors = ["Artem Vasilev <artempunkrocker@gmail.com>"]
 
 
 [tool.poetry.dependencies]
-python = "^3.8"
-jira = "^3.0.0"
-python-dotenv = "^1.0.0"
-PyYAML = "^6.0.0"
-tqdm = "^4.65.0"
-openpyxl = "^3.1.0"
+python = "^3.10"
+jira = "^3.10.5"
+python-dotenv = "^1.2.2"
+PyYAML = "^6.0.3"
+tqdm = "^4.67.3"
+openpyxl = "^3.1.5"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^8.0.0"
-coverage = "^7.0.0"
-pytest-cov = "^5.0.0"
-ruff = "^0.15.12"
+pytest = "^8.3.5"
+coverage = "^7.13.5"
+pytest-cov = "^6.1.0"
+ruff = "^0.14.13"
 python-semantic-release = "^10.5.3"
 
 [project.scripts]

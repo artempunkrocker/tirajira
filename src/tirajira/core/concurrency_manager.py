@@ -117,7 +117,7 @@ class ConcurrencyManager:
 
         for i, issue_data in enumerate(issues):
             if self.verbose:
-                self.logger.progress(f"Processing issue {i+1}/{len(issues)}...")
+                self.logger.progress(f"Processing issue {i + 1}/{len(issues)}...")
 
             try:
                 task_detail, success = processor_func(issue_data, i)

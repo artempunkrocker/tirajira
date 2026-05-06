@@ -9,12 +9,12 @@ Key features:
 - Request rate limiting to prevent exceeding API limits
 - Support for custom Jira fields
 
-The project is written in Python 3.8+ and uses the official `jira` package to work with the API.
+The project is written in Python 3.10+ and uses the official `jira` package to work with the API.
 
 # Development setup
 
 ## Requirements
-- Python 3.8+
+- Python 3.10+
 - Poetry 1.2+
 - Git 2.20+
 

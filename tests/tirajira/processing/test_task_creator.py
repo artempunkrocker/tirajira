@@ -229,9 +229,11 @@ class TestTaskCreatorIntegration:
 
         # Mock create_report_writer and open, but not generate_report
         # This will allow us to check that URLs are added to processing_details
-        with patch("tirajira.processing.report_generator.create_report_writer"), patch(
-            "builtins.open", mock_open()
-        ), patch.dict(os.environ, {"JIRA_SERVER": "https://test.atlassian.net"}):
+        with (
+            patch("tirajira.processing.report_generator.create_report_writer"),
+            patch("builtins.open", mock_open()),
+            patch.dict(os.environ, {"JIRA_SERVER": "https://test.atlassian.net"}),
+        ):
             # Call the report saving method
             task_creator._save_report(
                 "tasks.json", processing_details, "report.json", 2, 2

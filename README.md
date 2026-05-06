@@ -49,7 +49,7 @@ Done! Your tasks are created in Jira.
 
 ## System Requirements
 
-- Python 3.8 or higher
+- Python 3.10 or higher
 - Access to Jira Server
 - API token for Jira access
 
