@@ -2,7 +2,10 @@
 name: Release
 
 on:
-  push:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
     branches:
       - master
 
@@ -31,36 +34,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-poetry-
 
-      # 3. Step: Setup Python
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      # 4. Step: Install Poetry
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          version: 2.4.0
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-
-      # 5. Step: Install dependencies
-      - name: Install dependencies
-        run: |
-          poetry install
-
-      # 6. Step: Run tests
-      - name: Run tests
-        run: |
-          poetry run pytest
-
-      # 7. Step: Code linting
-      - name: Lint with Ruff
-        run: |
-          poetry run ruff check .
-
-      # 8. Step: Run Python Semantic Release
+      # 3. Step: Run Python Semantic Release
       - name: Python Semantic Release
         id: release
         uses: python-semantic-release/python-semantic-release@v10.5.3
@@ -69,20 +43,20 @@ jobs:
         env:
           PYTHON: python
 
-      # 9. Step: Build package
+      # 4. Step: Build package
       - name: Build package
         if: steps.release.outputs.released == 'true'
         run: |
           poetry build
 
-      # 10. Step: Publish to GitHub Release
+      # 5. Step: Publish to GitHub Release
       - name: Publish to GitHub Release
         if: steps.release.outputs.released == 'true'
         uses: python-semantic-release/publish-action@v10.5.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      # 11. Step: Publish to PyPI
+      # 6. Step: Publish to PyPI
       - name: Publish to PyPI
         if: steps.release.outputs.released == 'true'
         run: |
