@@ -4,17 +4,14 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "tirajira"
+version = "0.0.0"
 description = "TiraJira - tool for automating mass task creation in Jira with support for JSON, YAML, CSV, Excel and XML formats"
-authors = [
-  {name = "Artem Vasilev", email = "artempunkrocker@gmail.com"}
-]
-maintainers = [
-  {name = "Artem Vasilev", email = "artempunkrocker@gmail.com"}
-]
-license = "MIT"
+authors = [{name = "Artem Vasilev", email = "artempunkrocker@gmail.com"}]
+license = "Apache-2.0"
+readme = "README.md"
 keywords = ["jira", "automation", "task-creation", "json", "yaml", "csv", "excel", "xml"]
 requires-python = ">=3.8"
-dynamic = ["version", "readme", "classifiers", "dependencies"]
+dynamic = ["classifiers", "dependencies"]
 
 [project.urls]
 homepage = "https://github.com/artempunkrocker/tirajira"
@@ -22,22 +19,12 @@ repository = "https://github.com/artempunkrocker/tirajira"
 documentation = "https://github.com/artempunkrocker/tirajira"
 
 [tool.poetry]
-readme = "README.md"
-classifiers = [
-  "Development Status :: 5 - Production/Stable",
-  "Intended Audience :: Developers",
-  "Intended Audience :: System Administrators",
-  "Operating System :: OS Independent",
-  "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
-  "Topic :: Software Development :: Libraries :: Python Modules",
-  "Topic :: Utilities",
-]
+name = "tirajira"
 version = "0.0.0"
+description = "TiraJira - tool for automating mass task creation in Jira with support for JSON, YAML, CSV, Excel and XML formats"
+authors = ["Artem Vasilev <artempunkrocker@gmail.com>"]
+
+
 
 [tool.poetry.dependencies]
 python = "^3.8"
@@ -105,7 +92,7 @@ fail_under = 90
 directory = "htmlcov"
 
 [tool.semantic_release]
-version_toml = ["pyproject.toml:tool.poetry.version"]
+version_toml = ["pyproject.toml:project.version"]
 version_variables = ["src/tirajira/__init__.py:__version__"]
 build_command = "poetry build"
 changelog_file = "CHANGELOG.md"
