@@ -17,6 +17,13 @@ jobs:
       id-token: write
 
     steps:
+      - name: Skip release if CI failed
+        if: github.event.workflow_run.conclusion != 'success'
+        run: |
+          echo "CI workflow did not succeed (conclusion: ${{ github.event.workflow_run.conclusion }})"
+          echo "Skipping release..."
+          exit 0
+
       # 1. Step: Checkout code from repository
       - uses: actions/checkout@v4
         with:
