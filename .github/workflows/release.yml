@@ -30,6 +30,12 @@ jobs:
           fetch-depth: 0
           persist-credentials: true
 
+                # Setup Python version from matrix
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: 3.12
+
       # 2. Step: Cache dependencies
       - name: Cache dependencies
         uses: actions/cache@v3
@@ -40,6 +46,19 @@ jobs:
           key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
           restore-keys: |
             ${{ runner.os }}-poetry-
+
+      # Install Poetry
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 2.4.0
+          virtualenvs-create: true
+          virtualenvs-in-project: false
+
+      # Install project dependencies
+      - name: Install dependencies
+        run: |
+          poetry install
 
       # 3. Step: Run Python Semantic Release
       - name: Python Semantic Release
