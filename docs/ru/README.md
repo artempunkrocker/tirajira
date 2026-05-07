@@ -1,7 +1,7 @@
 # TiraJira (тиражира) - Автоматизация создания задач в Jira
 
 [![Версия PyPI](https://badge.fury.io/py/tirajira.svg)](https://badge.fury.io/py/tirajira)
-[![Лицензия: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Лицензия](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 **Устали от ручного создания десятков и сотен задач в Jira?** TiraJira - ваше решение!
 
@@ -119,4 +119,4 @@ TiraJira поддерживает два режима аутентификаци
 
 ## Лицензия
 
-MIT License - см. файл [LICENSE](LICENSE) для подробностей.
+Apache License 2.0 - см. файл [LICENSE](LICENSE) для подробностей.

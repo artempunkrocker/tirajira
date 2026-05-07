@@ -1,7 +1,7 @@
 # TiraJira - Jira Task Automation
 
 [![PyPI Version](https://badge.fury.io/py/tirajira.svg)](https://badge.fury.io/py/tirajira)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 **Tired of manually creating dozens or hundreds of tasks in Jira?** TiraJira is your solution!
 
@@ -119,4 +119,4 @@ Minimal example (JSON):
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+Apache License 2.0 - see [LICENSE](LICENSE) file for details.
