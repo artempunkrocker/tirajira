@@ -53,69 +53,10 @@ Done! Your tasks are created in Jira.
 - Access to Jira Server
 - API token for Jira access
 
-## Installation
+## Documentation
 
-For regular users (recommended):
-```bash
-pip3 install tirajira
-```
-
-For developers:
-```bash
-git clone https://github.com/your-login/tirajira.git
-cd tirajira
-poetry install
-```
-
-[More about installation](docs/installation.md)
-
-## Jira Connection Setup
-
-TiraJira supports two authentication modes:
-- **Jira Cloud** - Basic Auth (email + API token)
-- **Jira Server/Data Center** - Personal Access Token
-
-[More about connection setup](docs/configuration.md)
-
-## Preparing a Task File
-
-Supported formats: JSON, YAML, CSV, Excel, XML
-
-Minimal example (JSON):
-```json
-[
-  {
-    "project": {"key": "PROJ"},
-    "summary": "My first task",
-    "issuetype": {"name": "Task"}
-  }
-]
-```
-
-[More about file formats](docs/file_formats.md)
-
-## Commands
-
-- `import` - Create tasks from file
-- `resume` - Resume execution from report
-- `extract-failed` - Extract failed tasks from report
-
-[More about commands](docs/commands.md)
-
-## Detailed Documentation
-
-- [🔧 Installation and Setup](docs/installation.md)
-- [🔐 Jira Connection Setup](docs/configuration.md)
-- [📝 Preparing Task Files](docs/file_formats.md)
-- [🧰 Commands and Options](docs/commands.md)
-- [💡 Practical Examples](docs/examples.md)
-- [📋 Supported Task Fields](docs/fields.md)
-- [🛑 Request Rate Limiting Management](docs/rate_limiting.md)
-- [❓ Solving Common Problems](docs/troubleshooting.md)
-- [🤔 Frequently Asked Questions](docs/faq.md)
-- [📊 Report Format](docs/reports.md)
-- [👥 Contributing](docs/contributing.md)
-- [🆘 Support](docs/support.md)
+- 🇺🇸 [English Documentation](docs/en/index.md)
+- 🇷🇺 [Документация на русском языке](docs/ru/index.md)
 
 ## License
 
