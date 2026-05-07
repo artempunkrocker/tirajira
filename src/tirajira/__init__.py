@@ -5,7 +5,7 @@ The module allows creating tasks in Jira from JSON, YAML, CSV, or Excel files.
 Supports linking tasks to epics and logging the task creation process.
 """
 
-__version__ = "1.1.2"
+__version__ = "1.1.3"
 
 from .commands import BaseCommand, ExtractFailedCommand, ImportCommand, ResumeCommand
 
